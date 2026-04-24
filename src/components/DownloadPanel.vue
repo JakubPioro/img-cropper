@@ -110,6 +110,7 @@ function applyPrefixToAll(): void {
 h2 {
   margin: 4px 0 0;
   font-size: 22px;
+  font-weight: 800;
   text-transform: uppercase;
 }
 

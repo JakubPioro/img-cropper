@@ -251,7 +251,7 @@ watch(
     </div>
 
     <section class="process-section panel-rise">
-      <div class="process-head">Co teraz zrobic</div>
+      <div class="process-head">Co teraz zrobic?</div>
       <div class="process-track" role="list" aria-label="Kroki procesu">
         <div
           v-for="(label, index) in stepLabels"

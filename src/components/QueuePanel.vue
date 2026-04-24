@@ -538,6 +538,7 @@ onBeforeUnmount(() => {
 h2 {
   margin: 4px 0 0;
   font-size: 24px;
+  font-weight: 800;
   text-transform: uppercase;
 }
 

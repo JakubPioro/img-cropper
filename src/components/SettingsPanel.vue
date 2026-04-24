@@ -139,6 +139,7 @@ function restoreDefaults(): void {
           max="1"
           step="0.01"
           :value="draft.quality"
+          :disabled="draft.format === 'png'"
           @input="updateQuality"
         />
       </label>
@@ -184,6 +185,7 @@ function restoreDefaults(): void {
 h2 {
   margin: 4px 0 0;
   font-size: 22px;
+  font-weight: 800;
   text-transform: uppercase;
 }
 
@@ -220,6 +222,11 @@ label {
 
 .slider {
   accent-color: #2654c4;
+}
+
+.slider:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .actions-row {
