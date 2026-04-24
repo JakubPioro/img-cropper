@@ -38,6 +38,7 @@ const canvasCursor = ref("default");
 const interactionMode = ref<
   "none" | "move" | "resize-nw" | "resize-ne" | "resize-sw" | "resize-se"
 >("none");
+let loadImageVersion = 0;
 
 const HANDLE_SIZE = 8;
 const HANDLE_HIT_RADIUS = 10;
@@ -153,13 +154,30 @@ async function buildRotatedImage(
 }
 
 async function applyRotation(next: 0 | 90 | 180 | 270): Promise<void> {
+  await applyRotationWithInitial(next, props.initialCrop, props.initialRotation);
+}
+
+async function applyRotationWithInitial(
+  next: 0 | 90 | 180 | 270,
+  initialCrop: CropRect | null,
+  initialRotation: 0 | 90 | 180 | 270,
+  expectedLoadVersion?: number,
+): Promise<void> {
   const original = originalImageRef.value;
   if (!original) {
     return;
   }
 
   rotationDeg.value = next;
-  imageRef.value = await buildRotatedImage(original, next);
+  const rotatedImage = await buildRotatedImage(original, next);
+  if (
+    expectedLoadVersion !== undefined &&
+    expectedLoadVersion !== loadImageVersion
+  ) {
+    return;
+  }
+
+  imageRef.value = rotatedImage;
 
   const image = imageRef.value;
   if (!image) {
@@ -167,11 +185,9 @@ async function applyRotation(next: 0 | 90 | 180 | 270): Promise<void> {
   }
 
   const useInitial =
-    props.initialCrop &&
-    next === props.initialRotation &&
-    isCropRatioAligned(props.initialCrop);
+    initialCrop && next === initialRotation && isCropRatioAligned(initialCrop);
   cropRect.value = useInitial
-    ? clampRect(props.initialCrop, image.naturalWidth, image.naturalHeight)
+    ? clampRect(initialCrop, image.naturalWidth, image.naturalHeight)
     : centerRectForCurrentRatio(image.naturalWidth, image.naturalHeight);
 
   await nextTick();
@@ -604,16 +620,40 @@ function saveCrop(): void {
 }
 
 async function loadImage(): Promise<void> {
+  const expectedVersion = ++loadImageVersion;
+  const sourceUrl = props.sourceUrl;
+  const initialSwapTargetAxes = props.initialSwapTargetAxes;
+  const initialRotation = props.initialRotation;
+  const initialCrop = props.initialCrop ? { ...props.initialCrop } : null;
+
   const image = new Image();
-  image.src = props.sourceUrl;
+  image.src = sourceUrl;
   await image.decode();
+
+  if (expectedVersion !== loadImageVersion) {
+    return;
+  }
+
   originalImageRef.value = image;
-  swapTargetAxes.value = props.initialSwapTargetAxes;
-  await applyRotation(props.initialRotation);
+  swapTargetAxes.value = initialSwapTargetAxes;
+  await applyRotationWithInitial(
+    initialRotation,
+    initialCrop,
+    initialRotation,
+    expectedVersion,
+  );
 }
 
 watch(
-  () => props.sourceUrl,
+  () => [
+    props.sourceUrl,
+    props.initialRotation,
+    props.initialSwapTargetAxes,
+    props.initialCrop?.x ?? null,
+    props.initialCrop?.y ?? null,
+    props.initialCrop?.width ?? null,
+    props.initialCrop?.height ?? null,
+  ],
   async () => {
     await loadImage();
   },

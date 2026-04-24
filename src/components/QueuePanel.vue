@@ -229,6 +229,11 @@ function previewImageStyle(job: ImageJob): Record<string, string> {
 }
 
 function previewAspectRatio(job: ImageJob): number {
+  const rect = effectiveCropRect(job);
+  if (rect && rect.width > 0 && rect.height > 0) {
+    return rect.width / rect.height;
+  }
+
   if (!job.sourceWidth || !job.sourceHeight) {
     return props.targetWidth / props.targetHeight;
   }
