@@ -577,6 +577,12 @@ watch(
   }
 }
 
+@media (min-width: 1400px) {
+  .main-banner {
+    max-width: 40%;
+  }
+}
+
 .notify-toggle-btn {
   border: 2px solid #141414;
   background: #2654c4;
