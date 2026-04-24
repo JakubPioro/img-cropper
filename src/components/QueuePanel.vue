@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, onBeforeUnmount, ref, watch } from "vue";
 import type { ImageJob } from "../types/image";
 import { getOrientedTargetSize } from "../utils/imageMath";
 
@@ -20,6 +20,84 @@ const viewMode = ref<"grid" | "list">("grid");
 const statusFilter = ref<"all" | ImageJob["status"]>("all");
 const editingJobId = ref<string | null>(null);
 const renameDraft = ref("");
+const rotatedPreviewByJobId = ref<Record<string, string>>({});
+let rotatedPreviewVersion = 0;
+
+function cleanupRotatedPreviews(): void {
+  rotatedPreviewByJobId.value = {};
+}
+
+async function loadImage(url: string): Promise<HTMLImageElement> {
+  const image = new Image();
+  image.src = url;
+  await image.decode();
+  return image;
+}
+
+function drawRotatedImage(
+  image: HTMLImageElement,
+  rotationDeg: 0 | 90 | 180 | 270,
+): string {
+  const canvas = document.createElement("canvas");
+  if (rotationDeg === 90 || rotationDeg === 270) {
+    canvas.width = image.naturalHeight;
+    canvas.height = image.naturalWidth;
+  } else {
+    canvas.width = image.naturalWidth;
+    canvas.height = image.naturalHeight;
+  }
+
+  const ctx = canvas.getContext("2d", { alpha: false });
+  if (!ctx) {
+    return image.src;
+  }
+
+  if (rotationDeg === 90) {
+    ctx.translate(canvas.width, 0);
+    ctx.rotate(Math.PI / 2);
+  } else if (rotationDeg === 180) {
+    ctx.translate(canvas.width, canvas.height);
+    ctx.rotate(Math.PI);
+  } else if (rotationDeg === 270) {
+    ctx.translate(0, canvas.height);
+    ctx.rotate(-Math.PI / 2);
+  }
+
+  ctx.drawImage(image, 0, 0);
+  return canvas.toDataURL("image/png");
+}
+
+async function refreshRotatedPreviews(): Promise<void> {
+  const version = ++rotatedPreviewVersion;
+  const next: Record<string, string> = {};
+
+  for (const job of props.items) {
+    if (job.rotationDeg === 0) {
+      continue;
+    }
+
+    if (!effectiveCropRect(job) || !job.sourceWidth || !job.sourceHeight) {
+      continue;
+    }
+
+    try {
+      const image = await loadImage(job.originalUrl);
+      if (version !== rotatedPreviewVersion) {
+        return;
+      }
+
+      next[job.id] = drawRotatedImage(image, job.rotationDeg);
+    } catch {
+      // Fallback is handled by disabling crop preview for this item.
+    }
+  }
+
+  if (version !== rotatedPreviewVersion) {
+    return;
+  }
+
+  rotatedPreviewByJobId.value = next;
+}
 
 const filteredItems = computed(() => {
   if (statusFilter.value === "all") {
@@ -62,11 +140,30 @@ function effectiveCropRect(job: ImageJob) {
 }
 
 function useCropPreview(job: ImageJob): boolean {
-  return Boolean(effectiveCropRect(job) && job.sourceWidth && job.sourceHeight);
+  const hasRectAndSize = Boolean(
+    effectiveCropRect(job) && job.sourceWidth && job.sourceHeight,
+  );
+  if (!hasRectAndSize) {
+    return false;
+  }
+
+  if (job.rotationDeg === 0) {
+    return true;
+  }
+
+  return Boolean(rotatedPreviewByJobId.value[job.id]);
 }
 
 function previewSource(job: ImageJob): string {
-  return useCropPreview(job) ? job.originalUrl : previewUrl(job);
+  if (!useCropPreview(job)) {
+    return previewUrl(job);
+  }
+
+  if (job.rotationDeg === 0) {
+    return job.originalUrl;
+  }
+
+  return rotatedPreviewByJobId.value[job.id] ?? previewUrl(job);
 }
 
 function previewImageStyle(job: ImageJob): Record<string, string> {
@@ -173,6 +270,27 @@ function targetSizeLabel(job: ImageJob): string {
 
   return `${target.width}x${target.height}`;
 }
+
+watch(
+  () =>
+    props.items.map((job) => ({
+      id: job.id,
+      originalUrl: job.originalUrl,
+      rotationDeg: job.rotationDeg,
+      sourceWidth: job.sourceWidth,
+      sourceHeight: job.sourceHeight,
+      crop: effectiveCropRect(job),
+      updatedAt: job.updatedAt,
+    })),
+  () => {
+    void refreshRotatedPreviews();
+  },
+  { immediate: true, deep: true },
+);
+
+onBeforeUnmount(() => {
+  cleanupRotatedPreviews();
+});
 </script>
 
 <template>
@@ -586,6 +704,8 @@ h2 {
 .photo-cropped {
   position: absolute;
   object-fit: fill;
+  max-width: none;
+  max-height: none;
 }
 
 .status-pill {
