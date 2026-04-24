@@ -8,6 +8,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   update: [patch: Partial<ProcessingSettings>];
+  dirtyState: [isDirty: boolean];
 }>();
 
 const DEFAULT_SETTINGS: ProcessingSettings = {
@@ -36,6 +37,14 @@ const hasChanges = computed(
     draft.height !== props.settings.height ||
     draft.format !== props.settings.format ||
     draft.quality !== props.settings.quality,
+);
+
+watch(
+  hasChanges,
+  (isDirty) => {
+    emit("dirtyState", isDirty);
+  },
+  { immediate: true },
 );
 
 const formatLabel = computed(() => {

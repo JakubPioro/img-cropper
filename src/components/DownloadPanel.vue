@@ -1,38 +1,20 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed } from "vue";
 
 const props = defineProps<{
   readyCount: number;
   totalCount: number;
   isBusy: boolean;
+  isStepThreeApproved: boolean;
 }>();
 
 const emit = defineEmits<{
   process: [];
-  zip: [];
-  clear: [];
-  "rename-prefix": [prefix: string];
 }>();
 
-const namePrefix = ref("");
-const canApplyPrefix = computed(() => namePrefix.value.trim().length > 0);
-const canProcess = computed(() => props.totalCount > 0 && !props.isBusy);
-const canDownloadAllZip = computed(
-  () =>
-    props.totalCount > 0 &&
-    props.readyCount === props.totalCount &&
-    !props.isBusy,
+const canProcess = computed(
+  () => props.totalCount > 0 && !props.isBusy && props.isStepThreeApproved,
 );
-
-function applyPrefixToAll(): void {
-  const nextPrefix = namePrefix.value.trim();
-  if (!nextPrefix) {
-    return;
-  }
-
-  emit("rename-prefix", nextPrefix);
-  namePrefix.value = "";
-}
 </script>
 
 <template>
@@ -41,29 +23,11 @@ function applyPrefixToAll(): void {
       <h2>Krok 4. Przetworz i pobierz</h2>
     </header>
     <p class="step-copy">
-      Najpierw kliknij przetwarzanie. Gdy pliki beda gotowe, pobierzesz je
-      osobno lub wszystkie naraz w ZIP.
+      W tym kroku uruchamiasz przetwarzanie. Pobieranie ZIP jest dostepne w
+      kroku 5 po zakonczonym przetwarzaniu.
     </p>
 
     <div class="actions-row">
-      <div class="prefix-row">
-        <input
-          v-model="namePrefix"
-          class="prefix-input"
-          type="text"
-          placeholder="prefix nazwy, np. sesja"
-          @keydown.enter.prevent="applyPrefixToAll"
-        />
-        <button
-          class="step-btn step-btn-white"
-          type="button"
-          :disabled="!canApplyPrefix || props.totalCount === 0"
-          @click="applyPrefixToAll"
-        >
-          Nadaj prefix wszystkim
-        </button>
-      </div>
-
       <button
         class="step-btn step-btn-yellow"
         type="button"
@@ -71,21 +35,6 @@ function applyPrefixToAll(): void {
         @click="emit('process')"
       >
         {{ isBusy ? "Przetwarzanie..." : "Uruchom przetwarzanie" }}
-      </button>
-      <button
-        class="step-btn step-btn-white"
-        type="button"
-        :disabled="!canDownloadAllZip"
-        @click="emit('zip')"
-      >
-        Pobierz wszystko jako ZIP
-      </button>
-      <button
-        class="step-btn step-btn-blue"
-        type="button"
-        @click="emit('clear')"
-      >
-        Wyczysc
       </button>
     </div>
   </section>
@@ -130,22 +79,6 @@ h2 {
   padding: 10px;
 }
 
-.prefix-row {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 8px;
-}
-
-.prefix-input {
-  border: 2px solid #141414;
-  background: #fff;
-  color: #141414;
-  padding: 8px 10px;
-  font-size: 12px;
-  font-weight: 700;
-  font-family: "IBM Plex Mono", monospace;
-}
-
 .step-btn {
   border: 2px solid #141414;
   padding: 8px 10px;
@@ -168,10 +101,5 @@ h2 {
 .step-btn-white {
   background: #fff;
   color: #141414;
-}
-
-.step-btn-blue {
-  background: #2654c4;
-  color: #fff;
 }
 </style>

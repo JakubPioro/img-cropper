@@ -5,6 +5,7 @@ import UploadPanel from "../components/UploadPanel.vue";
 import SettingsPanel from "../components/SettingsPanel.vue";
 import QueuePanel from "../components/QueuePanel.vue";
 import DownloadPanel from "../components/DownloadPanel.vue";
+import DownloadSummaryPanel from "../components/DownloadSummaryPanel.vue";
 import NotificationsPanel from "../components/NotificationsPanel.vue";
 import CropEditor from "../components/CropEditor.vue";
 import { useImageStore } from "../stores/imageStore";
@@ -20,7 +21,10 @@ const {
   doneJobs,
   errorJobs,
   activeCropJob,
+  isDownloadLockedBySettings,
 } = storeToRefs(imageStore);
+const settingsDirty = ref(false);
+const stepThreeAccepted = ref(false);
 
 const currentStep = computed(() => {
   if (activeCropJob.value) {
@@ -31,6 +35,10 @@ const currentStep = computed(() => {
     return 1;
   }
 
+  if (settingsDirty.value) {
+    return 2;
+  }
+
   if (isProcessing.value) {
     return 4;
   }
@@ -39,11 +47,19 @@ const currentStep = computed(() => {
     return 3;
   }
 
-  if (doneJobs.value.length === jobs.value.length && jobs.value.length > 0) {
+  if (isProcessing.value) {
     return 4;
   }
 
-  return 2;
+  if (doneJobs.value.length === jobs.value.length && jobs.value.length > 0) {
+    return 5;
+  }
+
+  if (stepThreeAccepted.value) {
+    return 4;
+  }
+
+  return 3;
 });
 
 const nextActionText = computed(() => {
@@ -70,12 +86,38 @@ const nextActionText = computed(() => {
   return 'Sprawdz ustawienia i kliknij "Uruchom przetwarzanie".';
 });
 
+const stepInstructions = computed(() => [
+  "Dodaj zdjecia do kolejki (drag and drop lub przycisk), aby rozpoczac proces.",
+  "Ustaw docelowy rozmiar i format. Dla PNG jakosc jest bezstratna, wiec suwak jakosci pozostaje nieaktywny.",
+  "Sprawdz podglad i statusy plikow. W razie potrzeby kliknij Popraw kadr i zapisz reczne kadrowanie. W tym kroku mozesz tez nadac prefixy nazw wszystkim plikom (automatycznie numerowane). Gdy stan jest poprawny, kliknij Zatwierdz.",
+  "W kroku 4 uruchamiasz przetwarzanie.",
+  "Po zakonczeniu przetwarzania pobierz pliki pojedynczo lub jako ZIP. Opisy krokow podejrzysz po najechaniu, a aby zaczac od nowa uzyj przycisku WYCZYSC PLIKI.",
+]);
+
 const stepLabels = [
   "Dodaj zdjecia",
   "Ustaw parametry",
-  "Sprawdz liste i kadr",
-  "Przetworz i pobierz",
+  "Sprawdz liste + prefixy",
+  "Przetworz",
+  "Pobierz i nowa sesja",
 ];
+
+const hoveredInstructionStep = ref<number | null>(null);
+const displayedInstructionStep = computed(
+  () => hoveredInstructionStep.value ?? currentStep.value,
+);
+const displayedInstructionText = computed(() => {
+  const index = displayedInstructionStep.value - 1;
+  return stepInstructions.value[index] ?? nextActionText.value;
+});
+
+function setHoveredInstructionStep(step: number): void {
+  hoveredInstructionStep.value = step;
+}
+
+function clearHoveredInstructionStep(): void {
+  hoveredInstructionStep.value = null;
+}
 
 const notificationsOverlayOpen = ref(false);
 const isTabletOrDown = ref(false);
@@ -122,6 +164,14 @@ function updateViewportFlags(): void {
 
 function onFilesSelected(files: File[]): void {
   imageStore.addFiles(files);
+}
+
+function onSettingsDirtyState(isDirty: boolean): void {
+  settingsDirty.value = isDirty;
+}
+
+function acceptStepThreeState(): void {
+  stepThreeAccepted.value = true;
 }
 
 function handleEscapeClose(event: KeyboardEvent): void {
@@ -203,6 +253,19 @@ watch(
     flush: "post",
   },
 );
+
+watch(
+  () => ({
+    settingsDirty: settingsDirty.value,
+    activeCropJobId: activeCropJob.value?.id ?? null,
+    jobsSignature: jobs.value
+      .map((job) => `${job.id}:${job.status}:${job.updatedAt}`)
+      .join("|"),
+  }),
+  () => {
+    stepThreeAccepted.value = false;
+  },
+);
 </script>
 
 <template>
@@ -253,21 +316,30 @@ watch(
     <section class="process-section panel-rise">
       <div class="process-head">Co teraz zrobic?</div>
       <div class="process-track" role="list" aria-label="Kroki procesu">
-        <div
+        <button
           v-for="(label, index) in stepLabels"
           :key="label"
+          type="button"
           class="process-step"
           :class="{
             active: currentStep === index + 1,
             done: currentStep > index + 1,
+            selected: displayedInstructionStep === index + 1,
           }"
+          :aria-current="
+            displayedInstructionStep === index + 1 ? 'step' : undefined
+          "
+          @mouseenter="setHoveredInstructionStep(index + 1)"
+          @mouseleave="clearHoveredInstructionStep"
+          @focus="setHoveredInstructionStep(index + 1)"
+          @blur="clearHoveredInstructionStep"
           role="listitem"
         >
           <span class="process-index">{{ index + 1 }}</span>
           <span class="process-label">{{ label }}</span>
-        </div>
+        </button>
       </div>
-      <p class="process-action">{{ nextActionText }}</p>
+      <p class="process-action">{{ displayedInstructionText }}</p>
     </section>
 
     <section class="steps-layout">
@@ -276,13 +348,19 @@ watch(
         <SettingsPanel
           :settings="settings"
           @update="imageStore.updateSettings"
+          @dirty-state="onSettingsDirtyState"
         />
         <QueuePanel
           v-if="isTabletOrDown"
           :items="jobs"
           :target-width="settings.width"
           :target-height="settings.height"
+          :is-download-locked="isDownloadLockedBySettings"
+          :is-step-three-approved="stepThreeAccepted"
           @edit-crop="imageStore.openCropEditor"
+          @rename-prefix="imageStore.applyPrefixToAllNames"
+          @accept-current-state="acceptStepThreeState"
+          @clear-all="imageStore.clearAll"
           @download="imageStore.downloadSingle"
           @remove="imageStore.removeJob"
           @rename="imageStore.setJobCustomName"
@@ -291,10 +369,15 @@ watch(
           :ready-count="doneJobs.length"
           :total-count="jobs.length"
           :is-busy="isProcessing"
+          :is-step-three-approved="stepThreeAccepted"
           @process="imageStore.processAll"
-          @rename-prefix="imageStore.applyPrefixToAllNames"
+        />
+        <DownloadSummaryPanel
+          :ready-count="doneJobs.length"
+          :total-count="jobs.length"
+          :is-busy="isProcessing"
+          :is-download-locked="isDownloadLockedBySettings"
           @zip="imageStore.downloadAllAsZip"
-          @clear="imageStore.clearAll"
         />
       </aside>
 
@@ -303,7 +386,12 @@ watch(
           :items="jobs"
           :target-width="settings.width"
           :target-height="settings.height"
+          :is-download-locked="isDownloadLockedBySettings"
+          :is-step-three-approved="stepThreeAccepted"
           @edit-crop="imageStore.openCropEditor"
+          @rename-prefix="imageStore.applyPrefixToAllNames"
+          @accept-current-state="acceptStepThreeState"
+          @clear-all="imageStore.clearAll"
           @download="imageStore.downloadSingle"
           @remove="imageStore.removeJob"
           @rename="imageStore.setJobCustomName"
@@ -568,11 +656,18 @@ watch(
 
 .process-track {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   border-bottom: 3px solid #141414;
 }
 
 .process-step {
+  border: none;
+  text-align: left;
+  font: inherit;
+  cursor: default;
+  transition:
+    background-color 140ms ease,
+    filter 140ms ease;
   min-width: 0;
   display: grid;
   grid-template-columns: auto 1fr;
@@ -593,6 +688,23 @@ watch(
 
 .process-step.active {
   background: #f2c230;
+}
+
+.process-step.selected {
+  background: #d3e1ff;
+}
+
+.process-step.active.selected {
+  background: #f3cf4f;
+}
+
+.process-step.done.selected {
+  background: #cde9b8;
+}
+
+.process-step:focus-visible {
+  outline: 2px solid #141414;
+  outline-offset: -2px;
 }
 
 .process-index {
@@ -850,7 +962,7 @@ watch(
     border-right: none;
   }
 
-  .process-step:nth-child(-n + 2) {
+  .process-step:nth-child(-n + 4) {
     border-bottom: 3px solid #141414;
   }
 }

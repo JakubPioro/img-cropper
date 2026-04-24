@@ -52,9 +52,22 @@ function sanitizeCustomName(value: string): string {
 export const useImageStore = defineStore("image-store", () => {
   const jobs = ref<ImageJob[]>([]);
   const settings = ref<ProcessingSettings>({ ...DEFAULT_SETTINGS });
+  const lastProcessedSettings = ref<ProcessingSettings | null>(null);
   const notifications = ref<NotificationMessage[]>([]);
   const isProcessing = ref(false);
   const activeCropJobId = ref<string | null>(null);
+
+  function areSettingsEqual(
+    left: ProcessingSettings,
+    right: ProcessingSettings,
+  ): boolean {
+    return (
+      left.width === right.width &&
+      left.height === right.height &&
+      left.format === right.format &&
+      left.quality === right.quality
+    );
+  }
 
   const queuedJobs = computed(() =>
     jobs.value.filter((job) => job.status === "queued"),
@@ -67,6 +80,13 @@ export const useImageStore = defineStore("image-store", () => {
   const errorJobs = computed(() =>
     jobs.value.filter((job) => job.status === "error"),
   );
+  const isDownloadLockedBySettings = computed(() => {
+    if (!lastProcessedSettings.value) {
+      return false;
+    }
+
+    return !areSettingsEqual(settings.value, lastProcessedSettings.value);
+  });
 
   const progressText = computed(() => {
     if (jobs.value.length === 0) {
@@ -171,6 +191,19 @@ export const useImageStore = defineStore("image-store", () => {
     settings.value = { ...settings.value, ...next };
 
     for (const job of jobs.value) {
+      if (job.status === "done") {
+        if (job.outputUrl) {
+          URL.revokeObjectURL(job.outputUrl);
+        }
+        job.outputBlob = null;
+        job.outputUrl = null;
+        job.outputName = null;
+        job.status = "queued";
+        job.updatedAt = Date.now();
+      }
+    }
+
+    for (const job of jobs.value) {
       refreshAutoCropForJob(job);
     }
   }
@@ -183,6 +216,7 @@ export const useImageStore = defineStore("image-store", () => {
       }
     }
     jobs.value = [];
+    lastProcessedSettings.value = null;
     activeCropJobId.value = null;
     pushNotification("info", "Wyczyszczono cala kolejke.");
   }
@@ -340,6 +374,10 @@ export const useImageStore = defineStore("image-store", () => {
       await processJob(job);
     }
 
+    if (toProcess.length > 0) {
+      lastProcessedSettings.value = { ...settings.value };
+    }
+
     isProcessing.value = false;
 
     if (errorJobs.value.length > 0) {
@@ -357,6 +395,14 @@ export const useImageStore = defineStore("image-store", () => {
   }
 
   function downloadSingle(jobId: string): void {
+    if (isDownloadLockedBySettings.value) {
+      pushNotification(
+        "warning",
+        "Ustawienia zmienily sie od ostatniego przetwarzania. Uruchom przetwarzanie ponownie przed pobraniem.",
+      );
+      return;
+    }
+
     const job = jobs.value.find((item) => item.id === jobId);
     if (!job || !job.outputBlob || !job.outputName) {
       pushNotification(
@@ -370,6 +416,14 @@ export const useImageStore = defineStore("image-store", () => {
   }
 
   async function downloadAllAsZip(): Promise<void> {
+    if (isDownloadLockedBySettings.value) {
+      pushNotification(
+        "warning",
+        "Ustawienia zmienily sie od ostatniego przetwarzania. Uruchom przetwarzanie ponownie przed pobraniem.",
+      );
+      return;
+    }
+
     const files = doneJobs.value
       .map((job) => ({
         fileName: job.outputName,
@@ -403,6 +457,7 @@ export const useImageStore = defineStore("image-store", () => {
     queuedJobs,
     doneJobs,
     errorJobs,
+    isDownloadLockedBySettings,
     progressText,
     activeCropJob,
     addFiles,

@@ -7,6 +7,8 @@ const props = defineProps<{
   items: ImageJob[];
   targetWidth: number;
   targetHeight: number;
+  isDownloadLocked: boolean;
+  isStepThreeApproved: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -14,14 +16,32 @@ const emit = defineEmits<{
   download: [jobId: string];
   remove: [jobId: string];
   rename: [jobId: string, nextName: string];
+  "rename-prefix": [prefix: string];
+  acceptCurrentState: [];
+  clearAll: [];
 }>();
 
 const viewMode = ref<"grid" | "list">("grid");
 const statusFilter = ref<"all" | ImageJob["status"]>("all");
 const editingJobId = ref<string | null>(null);
 const renameDraft = ref("");
+const prefixDraft = ref("");
 const rotatedPreviewByJobId = ref<Record<string, string>>({});
 let rotatedPreviewVersion = 0;
+
+const canApplyPrefix = computed(
+  () => prefixDraft.value.trim().length > 0 && props.items.length > 0,
+);
+
+function applyPrefixToAll(): void {
+  const nextPrefix = prefixDraft.value.trim();
+  if (!nextPrefix) {
+    return;
+  }
+
+  emit("rename-prefix", nextPrefix);
+  prefixDraft.value = "";
+}
 
 function cleanupRotatedPreviews(): void {
   rotatedPreviewByJobId.value = {};
@@ -296,8 +316,20 @@ onBeforeUnmount(() => {
 <template>
   <section class="step-card panel-rise">
     <header class="step-head">
-      <div>
+      <div class="step-head-title">
         <h2>Krok 3. Lista plikow i status</h2>
+        <span
+          v-if="items.length > 0"
+          class="step-confirm-badge"
+          :class="{
+            'step-confirm-badge-approved': props.isStepThreeApproved,
+            'step-confirm-badge-pending': !props.isStepThreeApproved,
+          }"
+        >
+          {{
+            props.isStepThreeApproved ? "Zatwierdzono" : "Wymaga zatwierdzenia"
+          }}
+        </span>
       </div>
       <div class="view-controls" v-if="items.length > 0">
         <span class="view-label">Status</span>
@@ -335,6 +367,41 @@ onBeforeUnmount(() => {
       Po przetworzeniu mozesz pobrac plik od razu albo poprawic recznie kadr i
       uruchomic przetwarzanie ponownie.
     </p>
+
+    <div v-if="items.length > 0" class="step-confirm-row">
+      <div class="step-prefix-row">
+        <input
+          v-model="prefixDraft"
+          class="step-prefix-input"
+          type="text"
+          placeholder="prefix nazwy, np. sesja"
+          @keydown.enter.prevent="applyPrefixToAll"
+        />
+        <button
+          type="button"
+          class="step-confirm-btn step-prefix-apply-btn"
+          :disabled="!canApplyPrefix"
+          @click="applyPrefixToAll"
+        >
+          Nadaj prefix wszystkim
+        </button>
+      </div>
+      <button
+        type="button"
+        class="step-confirm-btn"
+        :disabled="props.isStepThreeApproved"
+        @click="emit('acceptCurrentState')"
+      >
+        Zatwierdz: akceptuje obecny stan i przechodze do kolejnego kroku
+      </button>
+      <button
+        type="button"
+        class="step-confirm-btn step-confirm-clear-btn"
+        @click="emit('clearAll')"
+      >
+        Wyczysc pliki
+      </button>
+    </div>
 
     <ul
       class="jobs-grid"
@@ -480,7 +547,7 @@ onBeforeUnmount(() => {
             :class="{ 'step-btn-icon-only': viewMode === 'grid' }"
             type="button"
             aria-label="Pobierz"
-            :disabled="job.status !== 'done'"
+            :disabled="job.status !== 'done' || props.isDownloadLocked"
             @click="emit('download', job.id)"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -535,6 +602,22 @@ onBeforeUnmount(() => {
   gap: 8px;
 }
 
+.step-head-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 8px;
+  row-gap: 4px;
+}
+
+.step-head-title h2 {
+  margin: 0;
+}
+
+.step-head-title .step-confirm-badge {
+  flex-shrink: 0;
+}
+
 h2 {
   margin: 4px 0 0;
   font-size: 24px;
@@ -548,6 +631,79 @@ h2 {
   border-bottom: 3px solid #141414;
   font-size: 14px;
   font-weight: 600;
+}
+
+.step-confirm-row {
+  padding: 10px;
+  border-bottom: 3px solid #141414;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.step-prefix-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  width: 100%;
+}
+
+.step-prefix-input {
+  border: 2px solid #141414;
+  background: #fff;
+  color: #141414;
+  padding: 8px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: "IBM Plex Mono", monospace;
+}
+
+.step-confirm-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #141414;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 4px 8px;
+  width: fit-content;
+}
+
+.step-confirm-badge-approved {
+  background: #d8f0c8;
+  color: #141414;
+}
+
+.step-confirm-badge-pending {
+  background: #f2c230;
+  color: #141414;
+}
+
+.step-confirm-btn {
+  flex: 1 1 260px;
+  border: 2px solid #141414;
+  background: #f2c230;
+  color: #141414;
+  padding: 7px 9px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.step-confirm-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.step-confirm-clear-btn {
+  background: #fff;
+}
+
+.step-prefix-apply-btn {
+  background: #fff;
 }
 
 .view-controls {
