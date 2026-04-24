@@ -1,5 +1,12 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, watch } from "vue";
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  watch,
+} from "vue";
 import type { ImageJob } from "../types/image";
 import { getOrientedTargetSize } from "../utils/imageMath";
 
@@ -26,6 +33,10 @@ const statusFilter = ref<"all" | ImageJob["status"]>("all");
 const editingJobId = ref<string | null>(null);
 const renameDraft = ref("");
 const prefixDraft = ref("");
+const stepHeadRef = ref<HTMLElement | null>(null);
+const stepHeadTitleRef = ref<HTMLElement | null>(null);
+const viewControlsRef = ref<HTMLElement | null>(null);
+const areTopControlsWrapped = ref(false);
 const rotatedPreviewByJobId = ref<Record<string, string>>({});
 let rotatedPreviewVersion = 0;
 
@@ -41,6 +52,23 @@ function applyPrefixToAll(): void {
 
   emit("rename-prefix", nextPrefix);
   prefixDraft.value = "";
+}
+
+function updateTopControlsWrapState(): void {
+  const stepHead = stepHeadRef.value;
+  const title = stepHeadTitleRef.value;
+  const controls = viewControlsRef.value;
+  if (!stepHead || !title || !controls) {
+    areTopControlsWrapped.value = false;
+    return;
+  }
+
+  const headTop = stepHead.getBoundingClientRect().top;
+  const titleBottom = title.getBoundingClientRect().bottom;
+  const controlsTop = controls.getBoundingClientRect().top;
+
+  areTopControlsWrapped.value =
+    controlsTop > headTop && controlsTop >= titleBottom;
 }
 
 function cleanupRotatedPreviews(): void {
@@ -310,13 +338,29 @@ watch(
 
 onBeforeUnmount(() => {
   cleanupRotatedPreviews();
+  window.removeEventListener("resize", updateTopControlsWrapState);
 });
+
+onMounted(async () => {
+  await nextTick();
+  updateTopControlsWrapState();
+  window.addEventListener("resize", updateTopControlsWrapState);
+});
+
+watch(
+  statusFilters,
+  async () => {
+    await nextTick();
+    updateTopControlsWrapState();
+  },
+  { deep: true },
+);
 </script>
 
 <template>
   <section class="step-card panel-rise">
-    <header class="step-head">
-      <div class="step-head-title">
+    <header ref="stepHeadRef" class="step-head">
+      <div ref="stepHeadTitleRef" class="step-head-title">
         <h2>Krok 3. Lista plikow i status</h2>
         <span
           v-if="items.length > 0"
@@ -331,36 +375,45 @@ onBeforeUnmount(() => {
           }}
         </span>
       </div>
-      <div class="view-controls" v-if="items.length > 0">
-        <span class="view-label">Status</span>
-        <button
-          v-for="filter in statusFilters"
-          :key="filter.key"
-          type="button"
-          class="view-btn filter-btn"
-          :class="{ active: statusFilter === filter.key }"
-          @click="statusFilter = filter.key"
-        >
-          {{ filter.label }} ({{ filter.count }})
-        </button>
+      <div
+        ref="viewControlsRef"
+        class="view-controls"
+        :class="{ wrapped: areTopControlsWrapped }"
+        v-if="items.length > 0"
+      >
+        <div class="view-group view-group-status">
+          <span class="view-label">Status</span>
+          <button
+            v-for="filter in statusFilters"
+            :key="filter.key"
+            type="button"
+            class="view-btn filter-btn"
+            :class="{ active: statusFilter === filter.key }"
+            @click="statusFilter = filter.key"
+          >
+            {{ filter.label }} ({{ filter.count }})
+          </button>
+        </div>
 
-        <span class="view-label">Widok</span>
-        <button
-          type="button"
-          class="view-btn"
-          :class="{ active: viewMode === 'grid' }"
-          @click="viewMode = 'grid'"
-        >
-          Siatka
-        </button>
-        <button
-          type="button"
-          class="view-btn"
-          :class="{ active: viewMode === 'list' }"
-          @click="viewMode = 'list'"
-        >
-          Lista
-        </button>
+        <div class="view-group view-group-mode">
+          <span class="view-label">Widok</span>
+          <button
+            type="button"
+            class="view-btn"
+            :class="{ active: viewMode === 'grid' }"
+            @click="viewMode = 'grid'"
+          >
+            Siatka
+          </button>
+          <button
+            type="button"
+            class="view-btn"
+            :class="{ active: viewMode === 'list' }"
+            @click="viewMode = 'list'"
+          >
+            Lista
+          </button>
+        </div>
       </div>
     </header>
     <p class="step-copy">
@@ -598,6 +651,7 @@ onBeforeUnmount(() => {
   border-bottom: 3px solid #141414;
   padding: 10px;
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
@@ -719,10 +773,42 @@ h2 {
 }
 
 .view-controls {
+  margin-left: auto;
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+  flex: 0 0 auto;
   gap: 6px;
+}
+
+.view-controls.wrapped {
+  width: 100%;
+  margin-left: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+}
+
+.view-group {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+  gap: 6px;
+}
+
+.view-controls.wrapped .view-group {
+  justify-content: flex-start;
+}
+
+.view-group-mode {
+  flex-wrap: nowrap;
+}
+
+.view-controls.wrapped .view-group-status {
+  width: 100%;
+  flex-wrap: wrap;
 }
 
 .view-label {
@@ -749,6 +835,7 @@ h2 {
 .filter-btn {
   font-size: 9px;
   letter-spacing: 0.02em;
+  white-space: nowrap;
 }
 
 .jobs-grid {
@@ -1072,6 +1159,24 @@ h2 {
 }
 
 @media (max-width: 900px) {
+  .step-prefix-row {
+    grid-template-columns: 1fr;
+  }
+
+  .step-prefix-apply-btn {
+    width: 100%;
+  }
+
+  .step-confirm-row {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .step-confirm-btn,
+  .step-confirm-clear-btn {
+    width: 100%;
+  }
+
   .jobs-grid {
     grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     gap: 12px;
