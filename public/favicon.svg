@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <rect width="64" height="64" rx="12" fill="#EDE1D3" />
+
+  <rect x="37.5" y="8.5" width="16.5" height="20" fill="#1554C8" />
+  <circle cx="45.5" cy="43" r="11.8" fill="#F3A312" />
+
+  <path d="M15 16h4.8" stroke="#090909" stroke-width="1.1" />
+  <path d="M15 16v4.8" stroke="#090909" stroke-width="1.1" />
+  <path d="M44.2 16H49" stroke="#090909" stroke-width="1.1" />
+  <path d="M49 16v4.8" stroke="#090909" stroke-width="1.1" />
+  <path d="M15 41v4.8" stroke="#090909" stroke-width="1.1" />
+  <path d="M15 45.8h4.8" stroke="#090909" stroke-width="1.1" />
+  <path d="M44.2 45.8H49" stroke="#090909" stroke-width="1.1" />
+  <path d="M49 41v4.8" stroke="#090909" stroke-width="1.1" />
+
+  <rect
+    x="17.5"
+    y="18.5"
+    width="27"
+    height="25"
+    fill="#EDE1D3"
+    stroke="#090909"
+    stroke-width="1"
+  />
+  <path
+    d="M17.5 27.5h27"
+    stroke="#090909"
+    stroke-width="0.45"
+    stroke-dasharray="1.4 1.2"
+  />
+  <circle cx="28.4" cy="22" r="3.4" fill="#F3A312" />
+  <path d="M17.5 38.5l10-9.7 8.9 8.8 8.1-8.1v13.9h-27V38.5z" fill="#1554C8" />
+  <path d="M36.4 37.6l8.1-8.1v13.9H30.8l5.6-5.8z" fill="#090909" />
+
+  <path
+    d="M12.8 47.2c0-2.5 2-4.5 4.5-4.5h2v9h-2c-2.5 0-4.5-2-4.5-4.5z"
+    fill="#090909"
+  />
+  <rect x="19.3" y="42.7" width="13.1" height="9" fill="#E62010" />
+</svg>

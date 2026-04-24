@@ -1,0 +1,102 @@
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=League+Spartan:wght@400;500;700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: "League Spartan", "Avenir Next", "Segoe UI", sans-serif;
+  color: #141414;
+  background: #f3efe2;
+}
+
+.app-root-shell {
+  overflow: hidden;
+}
+
+.bauhaus-canvas {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-image:
+    linear-gradient(90deg, rgba(20, 20, 20, 0.06) 1px, transparent 1px),
+    linear-gradient(rgba(20, 20, 20, 0.06) 1px, transparent 1px);
+  background-size:
+    24px 24px,
+    24px 24px;
+  background-position: center;
+}
+
+.bauhaus-canvas::before,
+.bauhaus-canvas::after {
+  content: "";
+  position: fixed;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bauhaus-canvas::before {
+  top: 0;
+  right: 0;
+  width: 240px;
+  height: 12px;
+  background: linear-gradient(
+    90deg,
+    #141414 0 25%,
+    #d64933 25% 50%,
+    #2654c4 50% 75%,
+    #f2c230 75% 100%
+  );
+  box-shadow: 0 12px 0 #141414;
+}
+
+.bauhaus-canvas::after {
+  display: none;
+}
+
+.panel-rise {
+  animation: panel-rise 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes panel-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 900px) {
+  html,
+  body,
+  #app {
+    height: auto;
+    min-height: 100dvh;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .bauhaus-canvas,
+  .app-root-shell {
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+}
