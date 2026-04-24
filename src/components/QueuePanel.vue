@@ -368,38 +368,21 @@ onBeforeUnmount(() => {
       uruchomic przetwarzanie ponownie.
     </p>
 
-    <div v-if="items.length > 0" class="step-confirm-row">
-      <div class="step-prefix-row">
-        <input
-          v-model="prefixDraft"
-          class="step-prefix-input"
-          type="text"
-          placeholder="prefix nazwy, np. sesja"
-          @keydown.enter.prevent="applyPrefixToAll"
-        />
-        <button
-          type="button"
-          class="step-confirm-btn step-prefix-apply-btn"
-          :disabled="!canApplyPrefix"
-          @click="applyPrefixToAll"
-        >
-          Nadaj prefix wszystkim
-        </button>
-      </div>
+    <div v-if="items.length > 0" class="step-prefix-row">
+      <input
+        v-model="prefixDraft"
+        class="step-prefix-input"
+        type="text"
+        placeholder="prefix nazwy, np. sesja"
+        @keydown.enter.prevent="applyPrefixToAll"
+      />
       <button
         type="button"
-        class="step-confirm-btn"
-        :disabled="props.isStepThreeApproved"
-        @click="emit('acceptCurrentState')"
+        class="step-confirm-btn step-prefix-apply-btn"
+        :disabled="!canApplyPrefix"
+        @click="applyPrefixToAll"
       >
-        Zatwierdz: akceptuje obecny stan i przechodze do kolejnego kroku
-      </button>
-      <button
-        type="button"
-        class="step-confirm-btn step-confirm-clear-btn"
-        @click="emit('clearAll')"
-      >
-        Wyczysc pliki
+        Nadaj prefix wszystkim
       </button>
     </div>
 
@@ -580,6 +563,24 @@ onBeforeUnmount(() => {
     </p>
 
     <p v-else class="empty-copy">Brak plikow w kolejce.</p>
+
+    <div v-if="items.length > 0" class="step-confirm-row">
+      <button
+        type="button"
+        class="step-confirm-btn"
+        :disabled="props.isStepThreeApproved"
+        @click="emit('acceptCurrentState')"
+      >
+        Zatwierdz: akceptuje obecny stan i przechodze do kolejnego kroku
+      </button>
+      <button
+        type="button"
+        class="step-confirm-btn step-confirm-clear-btn"
+        @click="emit('clearAll')"
+      >
+        Wyczysc pliki
+      </button>
+    </div>
   </section>
 </template>
 
@@ -588,7 +589,7 @@ onBeforeUnmount(() => {
   height: 100%;
   min-height: 0;
   display: grid;
-  grid-template-rows: auto auto 1fr;
+  grid-template-rows: auto auto auto minmax(0, 1fr) auto;
   border: 3px solid #141414;
   background: #ffe9d7;
 }
@@ -633,19 +634,23 @@ h2 {
   font-weight: 600;
 }
 
-.step-confirm-row {
+.step-prefix-row {
   padding: 10px;
   border-bottom: 3px solid #141414;
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
   gap: 8px;
 }
 
-.step-prefix-row {
-  display: grid;
-  grid-template-columns: 1fr auto;
+.step-confirm-row {
+  padding: 10px;
+  border-top: 3px solid #141414;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
   gap: 8px;
-  width: 100%;
 }
 
 .step-prefix-input {
@@ -653,6 +658,7 @@ h2 {
   background: #fff;
   color: #141414;
   padding: 8px 10px;
+  min-height: 40px;
   font-size: 12px;
   font-weight: 700;
   font-family: "IBM Plex Mono", monospace;
@@ -682,14 +688,19 @@ h2 {
 }
 
 .step-confirm-btn {
-  flex: 1 1 260px;
+  flex: 0 0 auto;
   border: 2px solid #141414;
   background: #f2c230;
   color: #141414;
+  width: fit-content;
   padding: 7px 9px;
   font-size: 11px;
   font-weight: 800;
   text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   cursor: pointer;
 }
 
@@ -704,6 +715,7 @@ h2 {
 
 .step-prefix-apply-btn {
   background: #fff;
+  min-height: 40px;
 }
 
 .view-controls {
@@ -741,6 +753,7 @@ h2 {
 
 .jobs-grid {
   min-height: 0;
+  height: 100%;
   margin: 0;
   padding: 12px;
   list-style: none;

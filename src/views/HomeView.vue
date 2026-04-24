@@ -965,5 +965,9 @@ watch(
   .process-step:nth-child(-n + 4) {
     border-bottom: 3px solid #141414;
   }
+
+  .process-step:last-child {
+    grid-column: 1 / -1;
+  }
 }
 </style>
