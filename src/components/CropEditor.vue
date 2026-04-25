@@ -49,11 +49,6 @@ const targetRatio = computed(() => {
   return swapTargetAxes.value ? 1 / baseRatio : baseRatio;
 });
 
-function isCropRatioAligned(rect: CropRect): boolean {
-  const rectRatio = rect.width / rect.height;
-  return Math.abs(rectRatio - targetRatio.value) < 0.01;
-}
-
 function centeredCrop(sourceWidth: number, sourceHeight: number): CropRect {
   const sourceRatio = sourceWidth / sourceHeight;
   if (sourceRatio > targetRatio.value) {
@@ -154,7 +149,7 @@ async function buildRotatedImage(
 }
 
 async function applyRotation(next: 0 | 90 | 180 | 270): Promise<void> {
-  await applyRotationWithInitial(next, props.initialCrop, props.initialRotation);
+  await applyRotationWithInitial(next, null, next);
 }
 
 async function applyRotationWithInitial(
@@ -185,7 +180,7 @@ async function applyRotationWithInitial(
   }
 
   const useInitial =
-    initialCrop && next === initialRotation && isCropRatioAligned(initialCrop);
+    initialCrop && next === initialRotation;
   cropRect.value = useInitial
     ? clampRect(initialCrop, image.naturalWidth, image.naturalHeight)
     : centerRectForCurrentRatio(image.naturalWidth, image.naturalHeight);
