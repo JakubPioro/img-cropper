@@ -281,7 +281,7 @@ watch(
       <h1 class="brand">
         <img
           class="brand-banner"
-          src="/main-banner.png"
+          src="../assets/main-banner.png"
           alt="img-cropper"
           draggable="false"
         />
