@@ -11,6 +11,7 @@ import CropEditor from "../components/CropEditor.vue";
 import { useImageStore } from "../stores/imageStore";
 import { getOrientedTargetSize } from "../utils/imageMath";
 import type { NotificationMessage } from "../types/image";
+import LanguageToggle from "../components/LanguageToggle.vue";
 
 const imageStore = useImageStore();
 const {
@@ -276,6 +277,7 @@ watch(
         src="/main-banner.png"
         alt="img-cropper - Skaluj i kadruj zdjecia"
       />
+      <LanguageToggle />
     </section>
 
     <TransitionGroup
@@ -504,6 +506,8 @@ watch(
   background: #ede1d3;
   padding: 10px;
   display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
   gap: 12px;
 }
 
