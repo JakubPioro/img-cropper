@@ -3,9 +3,13 @@ const ACCEPTED_MIME_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
 export const MAX_FILES = 50;
 export const MAX_FILE_SIZE_MB = 20;
 
+export type RejectionReason =
+  | "tooManyFiles"
+  | "unsupportedFormat"
+  | "fileTooLarge";
 export interface ValidationError {
   fileName: string;
-  reason: string;
+  reason: RejectionReason;
 }
 
 export interface ValidationResult {
@@ -25,7 +29,7 @@ export function validateFiles(
     if (existingCount + accepted.length >= MAX_FILES) {
       rejected.push({
         fileName: file.name,
-        reason: `Przekroczono limit ${MAX_FILES} plikow na sesje.`,
+        reason: "tooManyFiles",
       });
       continue;
     }
@@ -33,7 +37,7 @@ export function validateFiles(
     if (!ACCEPTED_MIME_TYPES.has(file.type)) {
       rejected.push({
         fileName: file.name,
-        reason: "Nieobslugiwany format. Dodaj JPG, PNG lub WebP.",
+        reason: "unsupportedFormat",
       });
       continue;
     }
@@ -41,7 +45,7 @@ export function validateFiles(
     if (file.size > maxBytes) {
       rejected.push({
         fileName: file.name,
-        reason: `Plik ma ponad ${MAX_FILE_SIZE_MB}MB.`,
+        reason: "fileTooLarge",
       });
       continue;
     }

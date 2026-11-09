@@ -4,9 +4,14 @@ import { useImageStore } from "./imageStore";
 import { validateFiles } from "../utils/fileValidation";
 import { processImageFile, readImageDimensions } from "../utils/imagePipeline";
 
-vi.mock("../utils/fileValidation", () => ({
-  validateFiles: vi.fn(),
-}));
+vi.mock("../utils/fileValidation", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("../utils/fileValidation")>();
+  return {
+    ...actual,
+    validateFiles: vi.fn(),
+  };
+});
 
 vi.mock("../utils/imagePipeline", () => ({
   processImageFile: vi.fn(),
@@ -66,7 +71,7 @@ describe("imageStore", () => {
 
     mockValidateFiles.mockReturnValue({
       accepted: [accepted],
-      rejected: [{ fileName: "bad.gif", reason: "Nieobslugiwany format" }],
+      rejected: [{ fileName: "bad.gif", reason: "unsupportedFormat" }],
     });
 
     store.addFiles([accepted]);
@@ -75,6 +80,9 @@ describe("imageStore", () => {
     expect(store.jobs).toHaveLength(1);
     expect(store.notifications.some((n) => n.level === "success")).toBe(true);
     expect(store.notifications.some((n) => n.level === "warning")).toBe(true);
+    const warning = store.notifications.find((n) => n.level === "warning");
+    expect(warning?.key).toBe("unsupportedFormat");
+    expect(warning?.params?.fileName).toBe("bad.gif");
     expect(store.jobs[0]?.sourceWidth).toBe(1600);
   });
 
@@ -83,9 +91,7 @@ describe("imageStore", () => {
 
     await store.processAll();
 
-    expect(store.notifications[0]?.text).toContain(
-      "Najpierw dodaj co najmniej jedno zdjecie",
-    );
+    expect(store.notifications[0]?.key).toBe("noFiles");
   });
 
   it("processes queued files and marks them as done", async () => {
@@ -156,7 +162,7 @@ describe("imageStore", () => {
     store.clearAll();
 
     expect(store.jobs).toHaveLength(0);
-    expect(store.notifications[0]?.text).toContain("Wyczyszczono cala kolejke");
+    expect(store.notifications[0]?.key).toBe("queueCleared");
     const revoke = globalThis.URL.revokeObjectURL as ReturnType<typeof vi.fn>;
     expect(revoke).toHaveBeenCalled();
   });

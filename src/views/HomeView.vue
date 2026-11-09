@@ -298,7 +298,7 @@ watch(
         class="toast-item"
         :class="toastColorClass(item.level)"
       >
-        {{ item.text }}
+        {{ $t(`notifications.messages.${item.key}`, item.params ?? {}) }}
       </article>
     </TransitionGroup>
 

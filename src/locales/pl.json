@@ -132,23 +132,22 @@
     "close": "Zamknij panel powiadomień",
     "dismiss": "Usuń powiadomienie",
     "empty": "Brak powiadomień.",
-    "filesAdded": "Dodano {count} plik do kolejki. | Dodano {count} pliki do kolejki. | Dodano {count} plików do kolejki.",
-    "fileRejected": "{fileName}: {reason}",
-    "queueCleared": "Wyczyszczono całą kolejkę.",
-    "jobRemoved": "Usunięto {name} z kolejki.",
-    "prefixApplied": "Nadano nowy prefiks nazwy {count} plikowi. | Nadano nowy prefiks nazw {count} plikom. | Nadano nowy prefiks nazw {count} plikom.",
-    "cropSaved": "Zapisano ręczny kadr dla {name}. Uruchom przetwarzanie ponownie.",
-    "noFiles": "Najpierw dodaj co najmniej jedno zdjęcie.",
-    "processedWithErrors": "Przetwarzanie zakończone z błędami. Sprawdź listę i popraw kadry.",
-    "processed": "Przetwarzanie zakończone. Możesz pobrać pliki pojedynczo lub jako ZIP.",
-    "settingsChanged": "Ustawienia zmieniły się od ostatniego przetwarzania. Przed pobraniem uruchom przetwarzanie ponownie.",
-    "notReady": "Ten plik nie jest jeszcze gotowy do pobrania.",
-    "nothingToZip": "Brak gotowych plików do spakowania."
-  },
-  "validation": {
-    "tooManyFiles": "Przekroczono limit {max} plików na sesję.",
-    "unsupportedFormat": "Nieobsługiwany format. Dodaj JPG, PNG lub WebP.",
-    "fileTooLarge": "Plik ma ponad {maxSizeMb} MB."
+    "messages": {
+      "filesAdded": "Dodano {count} plik do kolejki. | Dodano {count} pliki do kolejki. | Dodano {count} plików do kolejki.",
+      "tooManyFiles": "{fileName}: przekroczono limit {max} plików na sesję.",
+      "unsupportedFormat": "{fileName}: nieobsługiwany format. Dodaj JPG, PNG lub WebP.",
+      "fileTooLarge": "{fileName}: plik ma ponad {maxSizeMb} MB.",
+      "queueCleared": "Wyczyszczono całą kolejkę.",
+      "jobRemoved": "Usunięto {name} z kolejki.",
+      "prefixApplied": "Nadano nowy prefiks nazwy {count} plikowi. | Nadano nowy prefiks nazw {count} plikom. | Nadano nowy prefiks nazw {count} plikom.",
+      "cropSaved": "Zapisano ręczny kadr dla {name}. Uruchom przetwarzanie ponownie.",
+      "noFiles": "Najpierw dodaj co najmniej jedno zdjęcie.",
+      "processedWithErrors": "Przetwarzanie zakończone z błędami. Sprawdź listę i popraw kadry.",
+      "processed": "Przetwarzanie zakończone. Możesz pobrać pliki pojedynczo lub jako ZIP.",
+      "settingsChanged": "Ustawienia zmieniły się od ostatniego przetwarzania. Przed pobraniem uruchom przetwarzanie ponownie.",
+      "notReady": "Ten plik nie jest jeszcze gotowy do pobrania.",
+      "nothingToZip": "Brak gotowych plików do spakowania."
+    }
   },
   "errors": {
     "imageLoad": "Nie udało się wczytać obrazu.",

@@ -132,23 +132,22 @@
     "close": "Close notifications panel",
     "dismiss": "Dismiss notification",
     "empty": "No notifications.",
-    "filesAdded": "Added {count} file to the queue. | Added {count} files to the queue.",
-    "fileRejected": "{fileName}: {reason}",
-    "queueCleared": "Cleared the whole queue.",
-    "jobRemoved": "Removed {name} from the queue.",
-    "prefixApplied": "Applied a new name prefix to {count} file. | Applied a new name prefix to {count} files.",
-    "cropSaved": "Saved a manual crop for {name}. Run processing again.",
-    "noFiles": "Add at least one image first.",
-    "processedWithErrors": "Processing finished with errors. Check the list and fix the crops.",
-    "processed": "Processing finished. You can download files one by one or as a ZIP.",
-    "settingsChanged": "Settings have changed since the last run. Run processing again before downloading.",
-    "notReady": "This file is not ready for download yet.",
-    "nothingToZip": "No processed files to pack."
-  },
-  "validation": {
-    "tooManyFiles": "The limit of {max} files per session has been exceeded.",
-    "unsupportedFormat": "Unsupported format. Add JPG, PNG or WebP.",
-    "fileTooLarge": "The file is larger than {maxSizeMb} MB."
+    "messages": {
+      "filesAdded": "Added {count} file to the queue. | Added {count} files to the queue.",
+      "tooManyFiles": "{fileName}: the limit of {max} files per session has been exceeded.",
+      "unsupportedFormat": "{fileName}: unsupported format. Add JPG, PNG or WebP.",
+      "fileTooLarge": "{fileName}: the file is larger than {maxSizeMb} MB.",
+      "queueCleared": "Cleared the whole queue.",
+      "jobRemoved": "Removed {name} from the queue.",
+      "prefixApplied": "Applied a new name prefix to {count} file. | Applied a new name prefix to {count} files.",
+      "cropSaved": "Saved a manual crop for {name}. Run processing again.",
+      "noFiles": "Add at least one image first.",
+      "processedWithErrors": "Processing finished with errors. Check the list and fix the crops.",
+      "processed": "Processing finished. You can download files one by one or as a ZIP.",
+      "settingsChanged": "Settings have changed since the last run. Run processing again before downloading.",
+      "notReady": "This file is not ready for download yet.",
+      "nothingToZip": "No processed files to pack."
+    }
   },
   "errors": {
     "imageLoad": "Could not load the image.",

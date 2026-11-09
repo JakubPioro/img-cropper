@@ -1,3 +1,5 @@
+import type pl from "../locales/pl.json";
+
 export type OutputFormat = "jpeg" | "png" | "webp";
 
 export type JobStatus = "queued" | "processing" | "done" | "error";
@@ -16,10 +18,13 @@ export interface ProcessingSettings {
   quality: number;
 }
 
+type NotificationKey = keyof (typeof pl)["notifications"]["messages"];
+
 export interface NotificationMessage {
   id: string;
   level: "info" | "success" | "warning" | "error";
-  text: string;
+  key: NotificationKey;
+  params?: Record<string, string | number>;
 }
 
 export interface ImageJob {

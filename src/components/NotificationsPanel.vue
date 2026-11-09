@@ -32,7 +32,9 @@ function colorClass(level: NotificationMessage["level"]): string {
         class="note-row"
         :class="colorClass(item.level)"
       >
-        <p class="note-text">{{ item.text }}</p>
+        <p class="note-text">
+          {{ $t(`notifications.messages.${item.key}`, item.params ?? {}) }}
+        </p>
         <button
           class="note-close"
           type="button"

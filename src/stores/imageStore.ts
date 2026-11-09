@@ -7,7 +7,11 @@ import type {
   NotificationMessage,
   ProcessingSettings,
 } from "../types/image";
-import { validateFiles } from "../utils/fileValidation";
+import {
+  MAX_FILE_SIZE_MB,
+  MAX_FILES,
+  validateFiles,
+} from "../utils/fileValidation";
 import { processImageFile, readImageDimensions } from "../utils/imagePipeline";
 import {
   getCenteredCropRect,
@@ -88,19 +92,12 @@ export const useImageStore = defineStore("image-store", () => {
     return !areSettingsEqual(settings.value, lastProcessedSettings.value);
   });
 
-  const progressText = computed(() => {
-    if (jobs.value.length === 0) {
-      return "Brak plikow. Dodaj zdjecia, aby zaczac.";
-    }
-
-    return `Gotowe: ${doneJobs.value.length}/${jobs.value.length}, bledy: ${errorJobs.value.length}`;
-  });
-
   function pushNotification(
     level: NotificationMessage["level"],
-    text: string,
+    key: NotificationMessage["key"],
+    params?: NotificationMessage["params"],
   ): void {
-    notifications.value.unshift({ id: createId(), level, text });
+    notifications.value.unshift({ id: createId(), level, key, params });
   }
 
   function dismissNotification(id: string): void {
@@ -176,14 +173,17 @@ export const useImageStore = defineStore("image-store", () => {
     }
 
     if (validation.accepted.length > 0) {
-      pushNotification(
-        "success",
-        `Dodano ${validation.accepted.length} plik(ow) do kolejki.`,
-      );
+      pushNotification("success", "filesAdded", {
+        count: validation.accepted.length,
+      });
     }
 
     for (const rejected of validation.rejected) {
-      pushNotification("warning", `${rejected.fileName}: ${rejected.reason}`);
+      pushNotification("warning", rejected.reason, {
+        fileName: rejected.fileName,
+        max: MAX_FILES,
+        maxSizeMb: MAX_FILE_SIZE_MB,
+      });
     }
   }
 
@@ -218,7 +218,7 @@ export const useImageStore = defineStore("image-store", () => {
     jobs.value = [];
     lastProcessedSettings.value = null;
     activeCropJobId.value = null;
-    pushNotification("info", "Wyczyszczono cala kolejke.");
+    pushNotification("info", "queueCleared");
   }
 
   function removeJob(jobId: string): void {
@@ -237,7 +237,7 @@ export const useImageStore = defineStore("image-store", () => {
       activeCropJobId.value = null;
     }
 
-    pushNotification("info", `Usunieto ${removedJob.file.name} z kolejki.`);
+    pushNotification("info", "jobRemoved", { name: removedJob.file.name });
   }
 
   function openCropEditor(jobId: string): void {
@@ -279,10 +279,7 @@ export const useImageStore = defineStore("image-store", () => {
       setJobCustomName(job.id, numberedName);
     }
 
-    pushNotification(
-      "info",
-      `Nadano nowy prefix nazw dla ${jobs.value.length} plik(ow).`,
-    );
+    pushNotification("info", "prefixApplied", { count: jobs.value.length });
   }
 
   function closeCropEditor(): void {
@@ -317,10 +314,7 @@ export const useImageStore = defineStore("image-store", () => {
     job.error = null;
     job.updatedAt = Date.now();
     activeCropJobId.value = null;
-    pushNotification(
-      "info",
-      `Zapisano reczny kadr dla ${job.file.name}. Uruchom ponownie przetwarzanie.`,
-    );
+    pushNotification("info", "cropSaved", { name: job.file.name });
   }
 
   async function processJob(job: ImageJob): Promise<void> {
@@ -360,7 +354,7 @@ export const useImageStore = defineStore("image-store", () => {
 
   async function processAll(): Promise<void> {
     if (jobs.value.length === 0) {
-      pushNotification("info", "Najpierw dodaj co najmniej jedno zdjecie.");
+      pushNotification("info", "noFiles");
       return;
     }
 
@@ -381,34 +375,22 @@ export const useImageStore = defineStore("image-store", () => {
     isProcessing.value = false;
 
     if (errorJobs.value.length > 0) {
-      pushNotification(
-        "warning",
-        "Przetwarzanie zakonczone z bledami. Sprawdz liste i popraw kadry.",
-      );
+      pushNotification("warning", "processedWithErrors");
       return;
     }
 
-    pushNotification(
-      "success",
-      "Przetwarzanie zakonczone. Mozesz pobrac pliki pojedynczo lub jako ZIP.",
-    );
+    pushNotification("success", "processed");
   }
 
   function downloadSingle(jobId: string): void {
     if (isDownloadLockedBySettings.value) {
-      pushNotification(
-        "warning",
-        "Ustawienia zmienily sie od ostatniego przetwarzania. Uruchom przetwarzanie ponownie przed pobraniem.",
-      );
+      pushNotification("warning", "settingsChanged");
       return;
     }
 
     const job = jobs.value.find((item) => item.id === jobId);
     if (!job || !job.outputBlob || !job.outputName) {
-      pushNotification(
-        "warning",
-        "Ten plik nie jest jeszcze gotowy do pobrania.",
-      );
+      pushNotification("warning", "notReady");
       return;
     }
 
@@ -417,10 +399,7 @@ export const useImageStore = defineStore("image-store", () => {
 
   async function downloadAllAsZip(): Promise<void> {
     if (isDownloadLockedBySettings.value) {
-      pushNotification(
-        "warning",
-        "Ustawienia zmienily sie od ostatniego przetwarzania. Uruchom przetwarzanie ponownie przed pobraniem.",
-      );
+      pushNotification("warning", "settingsChanged");
       return;
     }
 
@@ -434,7 +413,7 @@ export const useImageStore = defineStore("image-store", () => {
       );
 
     if (files.length === 0) {
-      pushNotification("warning", "Brak gotowych plikow do spakowania.");
+      pushNotification("warning", "nothingToZip");
       return;
     }
 
@@ -458,7 +437,6 @@ export const useImageStore = defineStore("image-store", () => {
     doneJobs,
     errorJobs,
     isDownloadLockedBySettings,
-    progressText,
     activeCropJob,
     addFiles,
     updateSettings,
