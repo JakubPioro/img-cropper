@@ -12,7 +12,11 @@ import {
   MAX_FILES,
   validateFiles,
 } from "../utils/fileValidation";
-import { processImageFile, readImageDimensions } from "../utils/imagePipeline";
+import {
+  ProcessingError,
+  processImageFile,
+  readImageDimensions,
+} from "../utils/imagePipeline";
 import {
   getCenteredCropRect,
   getTargetRatioForSource,
@@ -346,8 +350,12 @@ export const useImageStore = defineStore("image-store", () => {
       job.updatedAt = Date.now();
     } catch (error) {
       job.status = "error";
-      job.error =
-        error instanceof Error ? error.message : "Nieznany blad przetwarzania.";
+      if (error instanceof ProcessingError) {
+        job.error = error.code;
+      } else {
+        console.error(error);
+        job.error = "unknown";
+      }
       job.updatedAt = Date.now();
     }
   }

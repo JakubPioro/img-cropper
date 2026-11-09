@@ -2,7 +2,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createPinia, setActivePinia } from "pinia";
 import { useImageStore } from "./imageStore";
 import { validateFiles } from "../utils/fileValidation";
-import { processImageFile, readImageDimensions } from "../utils/imagePipeline";
+import {
+  ProcessingError,
+  processImageFile,
+  readImageDimensions,
+} from "../utils/imagePipeline";
 
 vi.mock("../utils/fileValidation", async (importOriginal) => {
   const actual =
@@ -13,10 +17,15 @@ vi.mock("../utils/fileValidation", async (importOriginal) => {
   };
 });
 
-vi.mock("../utils/imagePipeline", () => ({
-  processImageFile: vi.fn(),
-  readImageDimensions: vi.fn(),
-}));
+vi.mock("../utils/imagePipeline", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("../utils/imagePipeline")>();
+  return {
+    ...actual,
+    processImageFile: vi.fn(),
+    readImageDimensions: vi.fn(),
+  };
+});
 
 vi.mock("../utils/zip", () => ({
   downloadZip: vi.fn(),
@@ -114,14 +123,34 @@ describe("imageStore", () => {
     const accepted = makeFile("photo.jpg");
 
     mockValidateFiles.mockReturnValue({ accepted: [accepted], rejected: [] });
-    mockProcessImageFile.mockRejectedValue(new Error("Boom"));
+    const boom = new Error("Boom");
+    mockProcessImageFile.mockRejectedValue(boom);
+    const consoleError = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
     store.addFiles([accepted]);
 
     await store.processAll();
 
     expect(store.jobs[0]?.status).toBe("error");
-    expect(store.jobs[0]?.error).toContain("Boom");
+    expect(store.jobs[0]?.error).toBe("unknown");
+    expect(consoleError).toHaveBeenCalledWith(boom);
+    consoleError.mockRestore();
     expect(store.notifications[0]?.level).toBe("warning");
+  });
+
+  it("stores the error code when processing throws a ProcessingError", async () => {
+    const store = useImageStore();
+    const accepted = makeFile("photo.jpg");
+
+    mockValidateFiles.mockReturnValue({ accepted: [accepted], rejected: [] });
+    mockProcessImageFile.mockRejectedValue(new ProcessingError("imageEncode"));
+    store.addFiles([accepted]);
+
+    await store.processAll();
+
+    expect(store.jobs[0]?.status).toBe("error");
+    expect(store.jobs[0]?.error).toBe("imageEncode");
   });
 
   it("applies prefix to all file names with numbering", () => {

@@ -19,6 +19,7 @@ export interface ProcessingSettings {
 }
 
 type NotificationKey = keyof (typeof pl)["notifications"]["messages"];
+export type JobErrorKey = keyof (typeof pl)["errors"];
 
 export interface NotificationMessage {
   id: string;
@@ -35,7 +36,7 @@ export interface ImageJob {
   swapTargetAxes: boolean;
   originalUrl: string;
   status: JobStatus;
-  error: string | null;
+  error: JobErrorKey | null;
   outputBlob: Blob | null;
   outputUrl: string | null;
   outputName: string | null;

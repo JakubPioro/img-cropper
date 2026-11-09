@@ -18,6 +18,21 @@ interface DecodedSource {
 
 type RotationDeg = 0 | 90 | 180 | 270;
 
+export type ProcessingErrorCode =
+  | "imageLoad"
+  | "imageEncode"
+  | "canvasUnsupported";
+
+export class ProcessingError extends Error {
+  readonly code: ProcessingErrorCode;
+
+  constructor(code: ProcessingErrorCode) {
+    super(code);
+    this.name = "ProcessingError";
+    this.code = code;
+  }
+}
+
 export interface ProcessResult {
   blob: Blob;
   outputName: string;
@@ -67,7 +82,7 @@ function loadImageElement(url: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error("Nie udalo sie wczytac obrazu."));
+    img.onerror = () => reject(new ProcessingError("imageLoad"));
     img.src = url;
   });
 }
@@ -108,7 +123,7 @@ function canvasToBlob(
     canvas.toBlob(
       (blob) => {
         if (!blob) {
-          reject(new Error("Nie udalo sie wygenerowac obrazu wyjsciowego."));
+          reject(new ProcessingError("imageEncode"));
           return;
         }
         resolve(blob);
@@ -153,7 +168,7 @@ function getRotatedSource(
 
   const ctx = canvas.getContext("2d", { alpha: false });
   if (!ctx) {
-    throw new Error("Przegladarka nie obsluguje Canvas 2D.");
+    throw new ProcessingError("canvasUnsupported");
   }
 
   if (rotation === 90) {
@@ -215,7 +230,7 @@ export async function processImageFile(
 
     const ctx = canvas.getContext("2d", { alpha: false });
     if (!ctx) {
-      throw new Error("Przegladarka nie obsluguje Canvas 2D.");
+      throw new ProcessingError("canvasUnsupported");
     }
 
     ctx.drawImage(

@@ -517,7 +517,9 @@ watch(
                 </svg>
               </button>
             </div>
-            <p v-if="job.error" class="job-error">{{ job.error }}</p>
+            <p v-if="job.error" class="job-error">
+              {{ $t(`errors.${job.error}`) }}
+            </p>
             <p v-else class="caption-hint">
               {{
                 useCropPreview(job)

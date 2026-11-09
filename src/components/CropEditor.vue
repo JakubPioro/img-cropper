@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, onMounted, ref, watch } from "vue";
 import type { CropRect } from "../types/image";
+import { ProcessingError } from "../utils/imagePipeline";
 
 const props = defineProps<{
   sourceUrl: string;
@@ -126,7 +127,7 @@ async function buildRotatedImage(
 
   const ctx = canvas.getContext("2d", { alpha: false });
   if (!ctx) {
-    throw new Error("Przegladarka nie obsluguje Canvas 2D.");
+    throw new ProcessingError("canvasUnsupported");
   }
 
   if (rotation === 90) {
