@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
+import { useI18n } from "vue-i18n";
 import UploadPanel from "../components/UploadPanel.vue";
 import SettingsPanel from "../components/SettingsPanel.vue";
 import QueuePanel from "../components/QueuePanel.vue";
@@ -14,6 +15,7 @@ import type { NotificationMessage } from "../types/image";
 import LanguageToggle from "../components/LanguageToggle.vue";
 
 const imageStore = useImageStore();
+const { t } = useI18n();
 const {
   jobs,
   settings,
@@ -65,43 +67,43 @@ const currentStep = computed(() => {
 
 const nextActionText = computed(() => {
   if (activeCropJob.value) {
-    return 'Teraz popraw recznie kadr dla wybranego zdjecia i kliknij "Zapisz kadr".';
+    return t("process.next.cropping");
   }
 
   if (jobs.value.length === 0) {
-    return "Teraz dodaj zdjecia w kroku Dodaj zdjecia.";
+    return t("process.next.empty");
   }
 
   if (isProcessing.value) {
-    return "Trwa przetwarzanie. Poczekaj na zakonczenie i sprawdz statusy na liscie plikow.";
+    return t("process.next.processing");
   }
 
   if (errorJobs.value.length > 0) {
-    return "Masz pliki z bledem. Popraw kadr na liscie i uruchom przetwarzanie ponownie.";
+    return t("process.next.hasErrors");
   }
 
   if (doneJobs.value.length === jobs.value.length && jobs.value.length > 0) {
-    return "Wszystko gotowe. Pobierz pliki pojedynczo lub cala paczke ZIP.";
+    return t("process.next.done");
   }
 
-  return 'Sprawdz ustawienia i kliknij "Uruchom przetwarzanie".';
+  return t("process.next.ready");
 });
 
-const stepInstructions = computed(() => [
-  "Dodaj zdjecia do kolejki (drag and drop lub przycisk), aby rozpoczac proces.",
-  "Ustaw docelowy rozmiar i format. Dla PNG jakosc jest bezstratna, wiec suwak jakosci pozostaje nieaktywny.",
-  "Sprawdz podglad i statusy plikow. W razie potrzeby kliknij Popraw kadr i zapisz reczne kadrowanie. W tym kroku mozesz tez nadac prefixy nazw wszystkim plikom (automatycznie numerowane). Gdy stan jest poprawny, kliknij Zatwierdz.",
-  "W kroku 4 uruchamiasz przetwarzanie.",
-  "Po zakonczeniu przetwarzania pobierz pliki pojedynczo lub jako ZIP. Opisy krokow podejrzysz po najechaniu, a aby zaczac od nowa uzyj przycisku WYCZYSC PLIKI.",
-]);
+const STEP_IDS = [
+  "upload",
+  "settings",
+  "review",
+  "process",
+  "download",
+] as const;
 
-const stepLabels = [
-  "Dodaj zdjecia",
-  "Ustaw parametry",
-  "Sprawdz liste + prefixy",
-  "Przetworz",
-  "Pobierz i nowa sesja",
-];
+const stepInstructions = computed(() =>
+  STEP_IDS.map((id) => t(`process.steps.${id}.instruction`)),
+);
+
+const stepLabels = computed(() =>
+  STEP_IDS.map((id) => t(`process.steps.${id}.label`)),
+);
 
 const hoveredInstructionStep = ref<number | null>(null);
 const displayedInstructionStep = computed(
@@ -233,9 +235,12 @@ const activeCropTargetSize = computed(() => {
   );
 });
 
-const floatingStatusText = computed(
-  () =>
-    `Gotowe: ${doneJobs.value.length}/${jobs.value.length} | Bledy: ${errorJobs.value.length}`,
+const floatingStatusText = computed(() =>
+  t("app.statusChip", {
+    done: doneJobs.value.length,
+    total: jobs.value.length,
+    errors: errorJobs.value.length,
+  }),
 );
 
 watch(
@@ -275,7 +280,7 @@ watch(
       <img
         class="main-banner"
         src="/main-banner.png"
-        alt="img-cropper - Skaluj i kadruj zdjecia"
+        :alt="$t('app.bannerAlt')"
       />
       <LanguageToggle />
     </section>
@@ -302,7 +307,7 @@ watch(
       <button
         class="notify-toggle-btn"
         type="button"
-        aria-label="Powiadomienia"
+        :aria-label="$t('notifications.open')"
         @click="toggleNotificationsOverlay"
       >
         <svg viewBox="0 0 24 24" aria-hidden="true" class="notify-bell-icon">
@@ -316,8 +321,12 @@ watch(
     </div>
 
     <section class="process-section panel-rise">
-      <div class="process-head">Co teraz zrobic?</div>
-      <div class="process-track" role="list" aria-label="Kroki procesu">
+      <div class="process-head">{{ $t("process.heading") }}</div>
+      <div
+        class="process-track"
+        role="list"
+        :aria-label="$t('process.stepsLabel')"
+      >
         <button
           v-for="(label, index) in stepLabels"
           :key="label"
@@ -410,7 +419,7 @@ watch(
         <button
           class="crop-close-btn"
           type="button"
-          aria-label="Zamknij edytor kadru"
+          :aria-label="$t('crop.closeEditor')"
           @click="imageStore.closeCropEditor"
         >
           x
@@ -449,7 +458,7 @@ watch(
       <div class="notifications-modal">
         <header class="notifications-modal-head">
           <div class="notifications-head-left">
-            <h3>Powiadomienia</h3>
+            <h3>{{ $t("notifications.title") }}</h3>
             <div class="notifications-modal-actions">
               <span class="notifications-count-chip">{{
                 notifications.length
@@ -463,13 +472,13 @@ watch(
               :disabled="notifications.length === 0"
               @click="clearAllNotifications"
             >
-              Usun wszystkie
+              {{ $t("notifications.clearAll") }}
             </button>
             <button
               type="button"
               class="notifications-close-btn"
               @click="closeNotificationsOverlay"
-              aria-label="Zamknij panel powiadomien"
+              :aria-label="$t('notifications.close')"
             >
               x
             </button>
@@ -482,7 +491,7 @@ watch(
         />
 
         <p v-if="notifications.length === 0" class="notifications-empty">
-          Brak powiadomien.
+          {{ $t("notifications.empty") }}
         </p>
       </div>
     </section>

@@ -36,6 +36,7 @@ function colorClass(level: NotificationMessage["level"]): string {
         <button
           class="note-close"
           type="button"
+          :aria-label="$t('notifications.dismiss')"
           @click="emit('dismiss', item.id)"
         >
           x

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from "vue";
+import { MAX_FILES, MAX_FILE_SIZE_MB } from "../utils/fileValidation";
 
 const emit = defineEmits<{
   filesSelected: [files: File[]];
@@ -31,11 +32,15 @@ function onDrop(event: DragEvent): void {
 <template>
   <section class="step-card panel-rise step-1">
     <header class="step-head">
-      <h2>Krok 1. Dodaj zdjecia</h2>
+      <h2>{{ $t("upload.title") }}</h2>
     </header>
     <p class="step-copy">
-      Przeciagnij pliki tutaj albo wybierz je przyciskiem. Obslugiwane formaty:
-      JPG, PNG, WebP. Limit: 50 plikow, do 20MB na plik.
+      {{
+        $t("upload.description", {
+          maxFiles: MAX_FILES,
+          maxSizeMb: MAX_FILE_SIZE_MB,
+        })
+      }}
     </p>
 
     <div
@@ -45,10 +50,10 @@ function onDrop(event: DragEvent): void {
       @dragleave.prevent="isDragging = false"
       @drop="onDrop"
     >
-      <p class="drop-title">Upusc pliki w tym obszarze</p>
-      <p class="drop-or">lub</p>
+      <p class="drop-title">{{ $t("upload.dropTitle") }}</p>
+      <p class="drop-or">{{ $t("upload.or") }}</p>
       <label class="step-btn step-btn-red">
-        Wybierz zdjecia
+        {{ $t("upload.choose") }}
         <input
           class="hidden"
           type="file"

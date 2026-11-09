@@ -24,11 +24,10 @@ const canDownloadAllZip = computed(
 <template>
   <section class="step-card panel-rise step-5">
     <header class="step-head">
-      <h2>Krok 5. Pobieranie</h2>
+      <h2>{{ $t("download.title") }}</h2>
     </header>
     <p class="step-copy">
-      Po przetworzeniu mozesz pobierac pojedyncze zdjecia przyciskiem "Pobierz"
-      w kroku 3. Tutaj pobierzesz caly zestaw jako ZIP.
+      {{ $t("download.description") }}
     </p>
 
     <div class="actions-row">
@@ -38,7 +37,7 @@ const canDownloadAllZip = computed(
         :disabled="!canDownloadAllZip"
         @click="emit('zip')"
       >
-        Pobierz wszystko jako ZIP
+        {{ $t("download.zip") }}
       </button>
     </div>
   </section>

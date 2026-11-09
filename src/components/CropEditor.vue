@@ -686,18 +686,17 @@ onMounted(async () => {
       class="pointer-events-none absolute left-20 top-0 h-2 w-20 bg-bauYellow"
     ></div>
     <h3 class="text-2xl font-bold uppercase tracking-wide text-bauBlack">
-      Reczne kadrowanie
+      {{ $t("crop.title") }}
     </h3>
     <p class="mt-2 text-base font-medium text-bauBlack/80">
-      Przeciagnij zaznaczony prostokat, aby ustawic kadr. Proporcja jest
-      zablokowana do finalnego rozmiaru.
+      {{ $t("crop.description") }}
     </p>
 
     <div class="editor-sections">
       <div class="controls-row">
         <button
           class="rotate-btn"
-          aria-label="Obroc w lewo"
+          :aria-label="$t('crop.rotateLeft')"
           type="button"
           @click="rotateBy(-90)"
         >
@@ -709,7 +708,7 @@ onMounted(async () => {
         </button>
         <button
           class="rotate-btn"
-          aria-label="Obroc w prawo"
+          :aria-label="$t('crop.rotateRight')"
           type="button"
           @click="rotateBy(90)"
         >
@@ -721,8 +720,8 @@ onMounted(async () => {
         </button>
         <button
           class="rotate-btn rotate-btn-orientation"
-          aria-label="Obroc ramke"
-          title="Obroc ramke"
+          :aria-label="$t('crop.rotateFrame')"
+          :title="$t('crop.rotateFrame')"
           type="button"
           @click="rotateSelectionArea"
         >
@@ -733,7 +732,7 @@ onMounted(async () => {
             <path d="M17 20h3v-3" />
             <path d="M20 17a7 7 0 0 1-11 3" />
           </svg>
-          <span>Obroc ramke</span>
+          <span>{{ $t("crop.rotateFrame") }}</span>
         </button>
       </div>
 
@@ -757,7 +756,7 @@ onMounted(async () => {
           type="button"
           @click="saveCrop"
         >
-          Zapisz
+          {{ $t("crop.save") }}
         </button>
       </div>
     </div>

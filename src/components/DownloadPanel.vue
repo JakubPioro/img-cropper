@@ -20,11 +20,10 @@ const canProcess = computed(
 <template>
   <section class="step-card panel-rise step-4">
     <header class="step-head">
-      <h2>Krok 4. Przetworz i pobierz</h2>
+      <h2>{{ $t("processing.title") }}</h2>
     </header>
     <p class="step-copy">
-      W tym kroku uruchamiasz przetwarzanie. Pobieranie ZIP jest dostepne w
-      kroku 5 po zakonczonym przetwarzaniu.
+      {{ $t("processing.description") }}
     </p>
 
     <div class="actions-row">
@@ -34,7 +33,7 @@ const canProcess = computed(
         :disabled="!canProcess"
         @click="emit('process')"
       >
-        {{ isBusy ? "Przetwarzanie..." : "Uruchom przetwarzanie" }}
+        {{ isBusy ? $t("processing.inProgress") : $t("processing.start") }}
       </button>
     </div>
   </section>

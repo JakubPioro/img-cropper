@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import type { OutputFormat, ProcessingSettings } from "../types/image";
 
 const props = defineProps<{
@@ -17,6 +18,8 @@ const DEFAULT_SETTINGS: ProcessingSettings = {
   format: "jpeg",
   quality: 0.9,
 };
+
+const { t } = useI18n();
 
 const draft = reactive<ProcessingSettings>({ ...props.settings });
 
@@ -48,13 +51,7 @@ watch(
 );
 
 const formatLabel = computed(() => {
-  if (draft.format === "png") {
-    return "PNG (bezstratny, wiekszy plik)";
-  }
-  if (draft.format === "webp") {
-    return "WebP (nowoczesny, mniejszy plik)";
-  }
-  return "JPG (uniwersalny)";
+  return t(`settings.formats.${draft.format}`);
 });
 
 function updateNumber(field: "width" | "height", event: Event): void {
@@ -98,16 +95,15 @@ function restoreDefaults(): void {
 <template>
   <section class="step-card panel-rise step-2">
     <header class="step-head">
-      <h2>Krok 2. Ustaw parametry</h2>
+      <h2>{{ $t("settings.title") }}</h2>
     </header>
     <p class="step-copy">
-      Domyslnie uzywamy 800x600. Zmien tylko wtedy, gdy potrzebujesz innego
-      finalnego rozmiaru.
+      {{ $t("settings.description") }}
     </p>
 
     <div class="fields-grid">
       <label>
-        Szerokosc
+        {{ $t("settings.width") }}
         <input
           class="field"
           type="number"
@@ -119,7 +115,7 @@ function restoreDefaults(): void {
       </label>
 
       <label>
-        Wysokosc
+        {{ $t("settings.height") }}
         <input
           class="field"
           type="number"
@@ -131,7 +127,7 @@ function restoreDefaults(): void {
       </label>
 
       <label>
-        Format wyjsciowy
+        {{ $t("settings.format") }}
         <select class="field" :value="draft.format" @change="updateFormat">
           <option value="jpeg">JPG</option>
           <option value="png">PNG</option>
@@ -140,7 +136,7 @@ function restoreDefaults(): void {
       </label>
 
       <label>
-        Jakosc (JPG/WebP)
+        {{ $t("settings.quality") }}
         <input
           class="slider"
           type="range"
@@ -154,7 +150,9 @@ function restoreDefaults(): void {
       </label>
     </div>
 
-    <p class="format-chip">Wybrany format: {{ formatLabel }}</p>
+    <p class="format-chip">
+      {{ $t("settings.selectedFormat", { format: formatLabel }) }}
+    </p>
 
     <div class="actions-row">
       <button
@@ -163,14 +161,14 @@ function restoreDefaults(): void {
         :disabled="!hasChanges"
         @click="confirmSettings"
       >
-        Zatwierdz
+        {{ $t("settings.confirm") }}
       </button>
       <button
         class="action-btn action-restore"
         type="button"
         @click="restoreDefaults"
       >
-        Przywroc
+        {{ $t("settings.restore") }}
       </button>
     </div>
   </section>

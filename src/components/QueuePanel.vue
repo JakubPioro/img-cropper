@@ -7,6 +7,7 @@ import {
   ref,
   watch,
 } from "vue";
+import { useI18n } from "vue-i18n";
 import type { ImageJob } from "../types/image";
 import { getOrientedTargetSize } from "../utils/imageMath";
 
@@ -155,6 +156,8 @@ const filteredItems = computed(() => {
   return props.items.filter((job) => job.status === statusFilter.value);
 });
 
+const { t } = useI18n();
+
 const statusFilters = computed(() => {
   const allCount = props.items.length;
   const queuedCount = props.items.filter(
@@ -167,15 +170,23 @@ const statusFilters = computed(() => {
   const errorCount = props.items.filter((job) => job.status === "error").length;
 
   return [
-    { key: "all" as const, label: "Wszystkie", count: allCount },
-    { key: "queued" as const, label: "Oczekujacy", count: queuedCount },
+    { key: "all" as const, label: t("queue.filters.all"), count: allCount },
+    {
+      key: "queued" as const,
+      label: t("queue.filters.queued"),
+      count: queuedCount,
+    },
     {
       key: "processing" as const,
-      label: "Przetwarzanie",
+      label: t("queue.filters.processing"),
       count: processingCount,
     },
-    { key: "done" as const, label: "Gotowe", count: doneCount },
-    { key: "error" as const, label: "Bledy", count: errorCount },
+    { key: "done" as const, label: t("queue.filters.done"), count: doneCount },
+    {
+      key: "error" as const,
+      label: t("queue.filters.error"),
+      count: errorCount,
+    },
   ];
 });
 
@@ -253,16 +264,7 @@ function previewAspectRatio(job: ImageJob): number {
 }
 
 function statusLabel(status: ImageJob["status"]): string {
-  if (status === "processing") {
-    return "Przetwarzanie...";
-  }
-  if (status === "done") {
-    return "Gotowe";
-  }
-  if (status === "error") {
-    return "Blad";
-  }
-  return "Oczekujacy";
+  return t(`queue.status.${status}`);
 }
 
 function baseNameWithoutExtension(fileName: string): string {
@@ -366,7 +368,7 @@ watch(
   <section class="step-card panel-rise">
     <header ref="stepHeadRef" class="step-head">
       <div ref="stepHeadTitleRef" class="step-head-title">
-        <h2>Krok 3. Lista plikow i status</h2>
+        <h2>{{ $t("queue.title") }}</h2>
         <span
           v-if="items.length > 0"
           class="step-confirm-badge"
@@ -376,7 +378,9 @@ watch(
           }"
         >
           {{
-            props.isStepThreeApproved ? "Zatwierdzono" : "Wymaga zatwierdzenia"
+            props.isStepThreeApproved
+              ? $t("queue.approved")
+              : $t("queue.needsApproval")
           }}
         </span>
       </div>
@@ -387,7 +391,7 @@ watch(
         v-if="items.length > 0"
       >
         <div class="view-group view-group-status">
-          <span class="view-label">Status</span>
+          <span class="view-label">{{ $t("queue.statusLabel") }}</span>
           <button
             v-for="filter in statusFilters"
             :key="filter.key"
@@ -401,14 +405,14 @@ watch(
         </div>
 
         <div class="view-group view-group-mode">
-          <span class="view-label">Widok</span>
+          <span class="view-label">{{ $t("queue.viewLabel") }}</span>
           <button
             type="button"
             class="view-btn"
             :class="{ active: viewMode === 'grid' }"
             @click="viewMode = 'grid'"
           >
-            Siatka
+            {{ $t("queue.viewGrid") }}
           </button>
           <button
             type="button"
@@ -416,14 +420,13 @@ watch(
             :class="{ active: viewMode === 'list' }"
             @click="viewMode = 'list'"
           >
-            Lista
+            {{ $t("queue.viewList") }}
           </button>
         </div>
       </div>
     </header>
     <p class="step-copy">
-      Po przetworzeniu mozesz pobrac plik od razu albo poprawic recznie kadr i
-      uruchomic przetwarzanie ponownie.
+      {{ $t("queue.description") }}
     </p>
 
     <div v-if="items.length > 0" class="step-prefix-row">
@@ -431,7 +434,7 @@ watch(
         v-model="prefixDraft"
         class="step-prefix-input"
         type="text"
-        placeholder="prefix nazwy, np. sesja"
+        :placeholder="$t('queue.prefixPlaceholder')"
         @keydown.enter.prevent="applyPrefixToAll"
       />
       <button
@@ -440,7 +443,7 @@ watch(
         :disabled="!canApplyPrefix"
         @click="applyPrefixToAll"
       >
-        Nadaj prefix wszystkim
+        {{ $t("queue.applyPrefix") }}
       </button>
     </div>
 
@@ -471,7 +474,7 @@ watch(
             >
               <img
                 :src="previewSource(job)"
-                :alt="`Podglad ${job.file.name}`"
+                :alt="$t('queue.previewAlt', { name: job.file.name })"
                 class="photo"
                 :class="{ 'photo-cropped': useCropPreview(job) }"
                 :style="previewImageStyle(job)"
@@ -496,7 +499,7 @@ watch(
                 class="rename-save-btn"
                 @click="applyRename(job.id)"
               >
-                OK
+                {{ $t("queue.renameSave") }}
               </button>
             </div>
             <div class="name-display" v-else-if="viewMode === 'grid'">
@@ -504,7 +507,7 @@ watch(
               <button
                 type="button"
                 class="rename-trigger-btn"
-                aria-label="Edytuj nazwe pliku"
+                :aria-label="$t('queue.rename')"
                 @click="startRename(job)"
               >
                 <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -516,8 +519,11 @@ watch(
             </div>
             <p v-if="job.error" class="job-error">{{ job.error }}</p>
             <p v-else class="caption-hint">
-              Podglad:
-              {{ useCropPreview(job) ? "zaznaczony obszar" : "kadr eksportu" }}
+              {{
+                useCropPreview(job)
+                  ? $t("queue.previewSelection")
+                  : $t("queue.previewExport")
+              }}
             </p>
           </div>
         </article>
@@ -536,7 +542,7 @@ watch(
               class="rename-save-btn"
               @click="applyRename(job.id)"
             >
-              OK
+              {{ $t("queue.renameSave") }}
             </button>
           </div>
           <div class="name-display" v-else>
@@ -544,7 +550,7 @@ watch(
             <button
               type="button"
               class="rename-trigger-btn"
-              aria-label="Edytuj nazwe pliku"
+              :aria-label="$t('queue.rename')"
               @click="startRename(job)"
             >
               <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -555,17 +561,25 @@ watch(
             </button>
           </div>
 
-          <p><strong>Plik:</strong> {{ job.file.name }}</p>
-          <p><strong>Rozmiar:</strong> {{ formatFileSize(job.file.size) }}</p>
           <p>
-            <strong>Zrodlo:</strong>
+            <strong>{{ $t("queue.meta.file") }}</strong> {{ job.file.name }}
+          </p>
+          <p>
+            <strong>{{ $t("queue.meta.size") }}</strong>
+            {{ formatFileSize(job.file.size) }}
+          </p>
+          <p>
+            <strong>{{ $t("queue.meta.source") }}</strong>
             {{
               job.sourceWidth && job.sourceHeight
                 ? `${job.sourceWidth}x${job.sourceHeight}`
                 : "-"
             }}
           </p>
-          <p><strong>Cel:</strong> {{ targetSizeLabel(job) }}</p>
+          <p>
+            <strong>{{ $t("queue.meta.target") }}</strong>
+            {{ targetSizeLabel(job) }}
+          </p>
         </section>
 
         <div class="job-actions">
@@ -573,7 +587,7 @@ watch(
             class="step-btn step-btn-white"
             :class="{ 'step-btn-icon-only': viewMode === 'grid' }"
             type="button"
-            aria-label="Popraw kadr"
+            :aria-label="$t('queue.editCrop')"
             @click="emit('editCrop', job.id)"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -581,13 +595,13 @@ watch(
                 d="M3 17.25V21h3.75L17.8 9.94l-3.75-3.75L3 17.25Zm17.71-10.04a1 1 0 0 0 0-1.41l-2.51-2.51a1 1 0 0 0-1.41 0l-1.96 1.96 3.75 3.75 2.13-2.13Z"
               />
             </svg>
-            <span v-if="viewMode === 'list'">Popraw kadr</span>
+            <span v-if="viewMode === 'list'">{{ $t("queue.editCrop") }}</span>
           </button>
           <button
             class="step-btn step-btn-blue"
             :class="{ 'step-btn-icon-only': viewMode === 'grid' }"
             type="button"
-            aria-label="Pobierz"
+            :aria-label="$t('queue.download')"
             :disabled="job.status !== 'done' || props.isDownloadLocked"
             @click="emit('download', job.id)"
           >
@@ -596,13 +610,13 @@ watch(
                 d="M12 3a1 1 0 0 1 1 1v8.59l2.3-2.3a1 1 0 1 1 1.4 1.42l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 1 1 1.4-1.42L11 12.6V4a1 1 0 0 1 1-1Zm-7 14a1 1 0 0 1 1 1v1h12v-1a1 1 0 1 1 2 0v2a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-2a1 1 0 0 1 1-1Z"
               />
             </svg>
-            <span v-if="viewMode === 'list'">Pobierz</span>
+            <span v-if="viewMode === 'list'">{{ $t("queue.download") }}</span>
           </button>
           <button
             class="step-btn step-btn-red"
             :class="{ 'step-btn-icon-only': viewMode === 'grid' }"
             type="button"
-            aria-label="Usun"
+            :aria-label="$t('queue.remove')"
             @click="emit('remove', job.id)"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -610,17 +624,17 @@ watch(
                 d="M9 3h6l1 2h4v2H4V5h4l1-2Zm-2 6h10v10a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2V9Zm2 2v7h2v-7H9Zm4 0v7h2v-7h-2Z"
               />
             </svg>
-            <span v-if="viewMode === 'list'">Usun</span>
+            <span v-if="viewMode === 'list'">{{ $t("queue.remove") }}</span>
           </button>
         </div>
       </li>
     </ul>
 
     <p v-else-if="items.length > 0" class="empty-copy">
-      Brak plikow pasujacych do wybranego statusu.
+      {{ $t("queue.emptyFiltered") }}
     </p>
 
-    <p v-else class="empty-copy">Brak plikow w kolejce.</p>
+    <p v-else class="empty-copy">{{ $t("queue.empty") }}</p>
 
     <div v-if="items.length > 0" class="step-confirm-row">
       <button
@@ -629,14 +643,14 @@ watch(
         :disabled="props.isStepThreeApproved"
         @click="emit('acceptCurrentState')"
       >
-        Zatwierdz: akceptuje obecny stan i przechodze do kolejnego kroku
+        {{ $t("queue.acceptState") }}
       </button>
       <button
         type="button"
         class="step-confirm-btn step-confirm-clear-btn"
         @click="emit('clearAll')"
       >
-        Wyczysc pliki
+        {{ $t("queue.clearAll") }}
       </button>
     </div>
   </section>
