@@ -179,8 +179,7 @@ async function applyRotationWithInitial(
     return;
   }
 
-  const useInitial =
-    initialCrop && next === initialRotation;
+  const useInitial = initialCrop && next === initialRotation;
   cropRect.value = useInitial
     ? clampRect(initialCrop, image.naturalWidth, image.naturalHeight)
     : centerRectForCurrentRatio(image.naturalWidth, image.naturalHeight);
