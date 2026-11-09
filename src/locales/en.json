@@ -1,0 +1,159 @@
+{
+  "app": {
+    "bannerAlt": "img-cropper – resize and crop images",
+    "languageToggle": "Change language",
+    "statusChip": "Done: {done}/{total} {'|'} Errors: {errors}",
+    "close": "Close"
+  },
+  "process": {
+    "heading": "What's next?",
+    "stepsLabel": "Process steps",
+    "steps": {
+      "upload": {
+        "label": "Add images",
+        "instruction": "Add images to the queue (drag and drop or use the button) to get started."
+      },
+      "settings": {
+        "label": "Set parameters",
+        "instruction": "Set the target size and format. PNG is lossless, so the quality slider is disabled for it."
+      },
+      "review": {
+        "label": "Review list and prefixes",
+        "instruction": "Check the previews and file statuses. If needed, click \"Fix crop\" and save a manual crop. You can also give all files a name prefix (numbered automatically). When everything looks right, click \"Approve\"."
+      },
+      "process": {
+        "label": "Process",
+        "instruction": "In this step you start processing."
+      },
+      "download": {
+        "label": "Download and start over",
+        "instruction": "After processing, download files one by one or as a ZIP. Hover over a step to see its description, and use the \"Clear files\" button to start over."
+      }
+    },
+    "next": {
+      "cropping": "Fix the crop of the selected image and click \"Save\".",
+      "empty": "Add images in the \"Add images\" step.",
+      "processing": "Processing in progress. Wait for it to finish and check the statuses in the file list.",
+      "hasErrors": "Some files have errors. Fix the crop in the list and run processing again.",
+      "done": "All done. Download files one by one or the whole ZIP package.",
+      "ready": "Check the settings and click \"Start processing\"."
+    }
+  },
+  "upload": {
+    "title": "Step 1. Add images",
+    "description": "Drag files here or choose them with the button. Supported formats: JPG, PNG, WebP. Limit: {maxFiles} files, up to {maxSizeMb} MB each.",
+    "dropTitle": "Drop files here",
+    "or": "or",
+    "choose": "Choose images"
+  },
+  "settings": {
+    "title": "Step 2. Set parameters",
+    "description": "The default is 800×600. Change it only if you need a different final size.",
+    "width": "Width",
+    "height": "Height",
+    "format": "Output format",
+    "quality": "Quality (JPG/WebP)",
+    "selectedFormat": "Selected format: {format}",
+    "formats": {
+      "jpeg": "JPG (universal)",
+      "png": "PNG (lossless, larger file)",
+      "webp": "WebP (modern, smaller file)"
+    },
+    "confirm": "Apply",
+    "restore": "Restore defaults"
+  },
+  "queue": {
+    "title": "Step 3. File list and status",
+    "approved": "Approved",
+    "needsApproval": "Needs approval",
+    "statusLabel": "Status",
+    "viewLabel": "View",
+    "viewGrid": "Grid",
+    "viewList": "List",
+    "description": "After processing you can download a file right away or fix the crop manually and run processing again.",
+    "prefixPlaceholder": "name prefix, e.g. session",
+    "applyPrefix": "Apply prefix to all",
+    "filters": {
+      "all": "All",
+      "queued": "Queued",
+      "processing": "Processing",
+      "done": "Done",
+      "error": "Errors"
+    },
+    "status": {
+      "queued": "Queued",
+      "processing": "Processing…",
+      "done": "Done",
+      "error": "Error"
+    },
+    "previewAlt": "Preview of {name}",
+    "previewSelection": "Preview: selected area",
+    "previewExport": "Preview: export crop",
+    "rename": "Rename file",
+    "renameSave": "OK",
+    "meta": {
+      "file": "File:",
+      "size": "Size:",
+      "source": "Source:",
+      "target": "Target:"
+    },
+    "editCrop": "Fix crop",
+    "download": "Download",
+    "remove": "Remove",
+    "emptyFiltered": "No files with the selected status.",
+    "empty": "No files in the queue.",
+    "acceptState": "Approve the current state and continue",
+    "clearAll": "Clear files"
+  },
+  "processing": {
+    "title": "Step 4. Process",
+    "description": "In this step you start processing. The ZIP download becomes available in step 5 once processing has finished.",
+    "start": "Start processing",
+    "inProgress": "Processing…"
+  },
+  "download": {
+    "title": "Step 5. Download",
+    "description": "Download single images with the \"Download\" button in step 3. Here you can download the whole set as a ZIP.",
+    "zip": "Download all as ZIP"
+  },
+  "crop": {
+    "title": "Manual crop",
+    "description": "Drag the selected rectangle to set the crop. The aspect ratio is locked to the final size.",
+    "rotateLeft": "Rotate left",
+    "rotateRight": "Rotate right",
+    "rotateFrame": "Rotate frame",
+    "save": "Save",
+    "closeEditor": "Close crop editor"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "open": "Notifications",
+    "clearAll": "Clear all",
+    "close": "Close notifications panel",
+    "dismiss": "Dismiss notification",
+    "empty": "No notifications.",
+    "filesAdded": "Added {count} file to the queue. | Added {count} files to the queue.",
+    "fileRejected": "{fileName}: {reason}",
+    "queueCleared": "Cleared the whole queue.",
+    "jobRemoved": "Removed {name} from the queue.",
+    "prefixApplied": "Applied a new name prefix to {count} file. | Applied a new name prefix to {count} files.",
+    "cropSaved": "Saved a manual crop for {name}. Run processing again.",
+    "noFiles": "Add at least one image first.",
+    "processedWithErrors": "Processing finished with errors. Check the list and fix the crops.",
+    "processed": "Processing finished. You can download files one by one or as a ZIP.",
+    "settingsChanged": "Settings have changed since the last run. Run processing again before downloading.",
+    "notReady": "This file is not ready for download yet.",
+    "nothingToZip": "No processed files to pack."
+  },
+  "validation": {
+    "tooManyFiles": "The limit of {max} files per session has been exceeded.",
+    "unsupportedFormat": "Unsupported format. Add JPG, PNG or WebP.",
+    "fileTooLarge": "The file is larger than {maxSizeMb} MB."
+  },
+  "errors": {
+    "imageLoad": "Could not load the image.",
+    "imageEncode": "Could not generate the output image.",
+    "canvasUnsupported": "This browser does not support Canvas 2D.",
+    "unknown": "Unknown processing error."
+  }
+}

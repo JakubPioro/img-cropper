@@ -1,0 +1,159 @@
+{
+  "app": {
+    "bannerAlt": "img-cropper – skaluj i kadruj zdjęcia",
+    "languageToggle": "Zmień język",
+    "statusChip": "Gotowe: {done}/{total} {'|'} Błędy: {errors}",
+    "close": "Zamknij"
+  },
+  "process": {
+    "heading": "Co teraz zrobić?",
+    "stepsLabel": "Kroki procesu",
+    "steps": {
+      "upload": {
+        "label": "Dodaj zdjęcia",
+        "instruction": "Dodaj zdjęcia do kolejki (przeciągnij i upuść lub użyj przycisku), aby rozpocząć."
+      },
+      "settings": {
+        "label": "Ustaw parametry",
+        "instruction": "Ustaw docelowy rozmiar i format. PNG jest bezstratny, więc suwak jakości jest wtedy nieaktywny."
+      },
+      "review": {
+        "label": "Sprawdź listę i prefiksy",
+        "instruction": "Sprawdź podgląd i statusy plików. W razie potrzeby kliknij „Popraw kadr” i zapisz ręczne kadrowanie. Możesz też nadać wszystkim plikom prefiks nazwy (numerowany automatycznie). Gdy wszystko się zgadza, kliknij „Zatwierdź”."
+      },
+      "process": {
+        "label": "Przetwórz",
+        "instruction": "W tym kroku uruchamiasz przetwarzanie."
+      },
+      "download": {
+        "label": "Pobierz i zacznij od nowa",
+        "instruction": "Po przetworzeniu pobierz pliki pojedynczo lub jako ZIP. Opisy kroków zobaczysz po najechaniu na nie, a żeby zacząć od nowa, użyj przycisku „Wyczyść pliki”."
+      }
+    },
+    "next": {
+      "cropping": "Popraw kadr wybranego zdjęcia i kliknij „Zapisz”.",
+      "empty": "Dodaj zdjęcia w kroku „Dodaj zdjęcia”.",
+      "processing": "Trwa przetwarzanie. Poczekaj na zakończenie i sprawdź statusy na liście plików.",
+      "hasErrors": "Część plików ma błędy. Popraw kadr na liście i uruchom przetwarzanie ponownie.",
+      "done": "Wszystko gotowe. Pobierz pliki pojedynczo lub całą paczkę ZIP.",
+      "ready": "Sprawdź ustawienia i kliknij „Uruchom przetwarzanie”."
+    }
+  },
+  "upload": {
+    "title": "Krok 1. Dodaj zdjęcia",
+    "description": "Przeciągnij pliki tutaj albo wybierz je przyciskiem. Obsługiwane formaty: JPG, PNG, WebP. Limit: {maxFiles} plików, do {maxSizeMb} MB na plik.",
+    "dropTitle": "Upuść pliki w tym obszarze",
+    "or": "lub",
+    "choose": "Wybierz zdjęcia"
+  },
+  "settings": {
+    "title": "Krok 2. Ustaw parametry",
+    "description": "Domyślnie używamy 800×600. Zmień tylko wtedy, gdy potrzebujesz innego rozmiaru końcowego.",
+    "width": "Szerokość",
+    "height": "Wysokość",
+    "format": "Format wyjściowy",
+    "quality": "Jakość (JPG/WebP)",
+    "selectedFormat": "Wybrany format: {format}",
+    "formats": {
+      "jpeg": "JPG (uniwersalny)",
+      "png": "PNG (bezstratny, większy plik)",
+      "webp": "WebP (nowoczesny, mniejszy plik)"
+    },
+    "confirm": "Zatwierdź",
+    "restore": "Przywróć domyślne"
+  },
+  "queue": {
+    "title": "Krok 3. Lista plików i status",
+    "approved": "Zatwierdzono",
+    "needsApproval": "Wymaga zatwierdzenia",
+    "statusLabel": "Status",
+    "viewLabel": "Widok",
+    "viewGrid": "Siatka",
+    "viewList": "Lista",
+    "description": "Po przetworzeniu możesz od razu pobrać plik albo ręcznie poprawić kadr i uruchomić przetwarzanie ponownie.",
+    "prefixPlaceholder": "prefiks nazwy, np. sesja",
+    "applyPrefix": "Nadaj prefiks wszystkim",
+    "filters": {
+      "all": "Wszystkie",
+      "queued": "Oczekujące",
+      "processing": "W trakcie",
+      "done": "Gotowe",
+      "error": "Błędy"
+    },
+    "status": {
+      "queued": "Oczekuje",
+      "processing": "Przetwarzanie…",
+      "done": "Gotowe",
+      "error": "Błąd"
+    },
+    "previewAlt": "Podgląd {name}",
+    "previewSelection": "Podgląd: zaznaczony obszar",
+    "previewExport": "Podgląd: kadr eksportu",
+    "rename": "Edytuj nazwę pliku",
+    "renameSave": "OK",
+    "meta": {
+      "file": "Plik:",
+      "size": "Rozmiar:",
+      "source": "Źródło:",
+      "target": "Cel:"
+    },
+    "editCrop": "Popraw kadr",
+    "download": "Pobierz",
+    "remove": "Usuń",
+    "emptyFiltered": "Brak plików o wybranym statusie.",
+    "empty": "Brak plików w kolejce.",
+    "acceptState": "Zatwierdź obecny stan i przejdź dalej",
+    "clearAll": "Wyczyść pliki"
+  },
+  "processing": {
+    "title": "Krok 4. Przetwórz",
+    "description": "W tym kroku uruchamiasz przetwarzanie. Pobieranie ZIP będzie dostępne w kroku 5, gdy przetwarzanie się zakończy.",
+    "start": "Uruchom przetwarzanie",
+    "inProgress": "Przetwarzanie…"
+  },
+  "download": {
+    "title": "Krok 5. Pobieranie",
+    "description": "Pojedyncze zdjęcia pobierzesz przyciskiem „Pobierz” w kroku 3. Tutaj pobierzesz cały zestaw jako ZIP.",
+    "zip": "Pobierz wszystko jako ZIP"
+  },
+  "crop": {
+    "title": "Ręczne kadrowanie",
+    "description": "Przeciągnij zaznaczony prostokąt, aby ustawić kadr. Proporcje są zablokowane do rozmiaru końcowego.",
+    "rotateLeft": "Obróć w lewo",
+    "rotateRight": "Obróć w prawo",
+    "rotateFrame": "Obróć ramkę",
+    "save": "Zapisz",
+    "closeEditor": "Zamknij edytor kadru"
+  },
+  "notifications": {
+    "title": "Powiadomienia",
+    "open": "Powiadomienia",
+    "clearAll": "Usuń wszystkie",
+    "close": "Zamknij panel powiadomień",
+    "dismiss": "Usuń powiadomienie",
+    "empty": "Brak powiadomień.",
+    "filesAdded": "Dodano {count} plik do kolejki. | Dodano {count} pliki do kolejki. | Dodano {count} plików do kolejki.",
+    "fileRejected": "{fileName}: {reason}",
+    "queueCleared": "Wyczyszczono całą kolejkę.",
+    "jobRemoved": "Usunięto {name} z kolejki.",
+    "prefixApplied": "Nadano nowy prefiks nazwy {count} plikowi. | Nadano nowy prefiks nazw {count} plikom. | Nadano nowy prefiks nazw {count} plikom.",
+    "cropSaved": "Zapisano ręczny kadr dla {name}. Uruchom przetwarzanie ponownie.",
+    "noFiles": "Najpierw dodaj co najmniej jedno zdjęcie.",
+    "processedWithErrors": "Przetwarzanie zakończone z błędami. Sprawdź listę i popraw kadry.",
+    "processed": "Przetwarzanie zakończone. Możesz pobrać pliki pojedynczo lub jako ZIP.",
+    "settingsChanged": "Ustawienia zmieniły się od ostatniego przetwarzania. Przed pobraniem uruchom przetwarzanie ponownie.",
+    "notReady": "Ten plik nie jest jeszcze gotowy do pobrania.",
+    "nothingToZip": "Brak gotowych plików do spakowania."
+  },
+  "validation": {
+    "tooManyFiles": "Przekroczono limit {max} plików na sesję.",
+    "unsupportedFormat": "Nieobsługiwany format. Dodaj JPG, PNG lub WebP.",
+    "fileTooLarge": "Plik ma ponad {maxSizeMb} MB."
+  },
+  "errors": {
+    "imageLoad": "Nie udało się wczytać obrazu.",
+    "imageEncode": "Nie udało się wygenerować obrazu wyjściowego.",
+    "canvasUnsupported": "Przeglądarka nie obsługuje Canvas 2D.",
+    "unknown": "Nieznany błąd przetwarzania."
+  }
+}
