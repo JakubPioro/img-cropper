@@ -610,6 +610,31 @@ watch(
   white-space: nowrap;
 }
 
+/* On phones show only the logo, left of the divider: its marks span x 48–625,
+   y 20–252 of 1360×320, so crop to x 28–645, y 0–272 for an even 20px margin. */
+@media (max-width: 640px) {
+  .brand {
+    width: min(100%, 280px);
+    aspect-ratio: 617 / 272;
+    overflow: hidden;
+  }
+
+  .brand-banner {
+    width: calc(100% * 1360 / 617);
+    max-width: none;
+    margin-left: calc(-100% * 28 / 617);
+  }
+
+  /* Hidden visually but still read as part of the heading. */
+  .brand-tagline {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+}
+
 @media (min-width: 901px) {
   .brand {
     width: min(50%, 1360px);
