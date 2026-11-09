@@ -1,6 +1,6 @@
 {
   "app": {
-    "bannerAlt": "img-cropper – resize and crop images",
+    "tagline": "Scale and crop images.",
     "languageToggle": "Change language",
     "statusChip": "Done: {done}/{total} {'|'} Errors: {errors}",
     "close": "Close"

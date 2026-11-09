@@ -277,11 +277,16 @@ watch(
 <template>
   <main class="app-shell">
     <section class="app-header panel-rise">
-      <img
-        class="main-banner"
-        src="/main-banner.png"
-        :alt="$t('app.bannerAlt')"
-      />
+      <!-- The tagline is real text laid over a gap in the banner, so it switches with the language without loading another image. -->
+      <h1 class="brand">
+        <img
+          class="brand-banner"
+          src="/main-banner.png"
+          alt="img-cropper"
+          draggable="false"
+        />
+        <span class="brand-tagline">{{ $t("app.tagline") }}</span>
+      </h1>
       <LanguageToggle />
     </section>
 
@@ -577,22 +582,43 @@ watch(
   color: #fff;
 }
 
-.main-banner {
-  width: auto;
-  max-width: 100%;
-  height: auto;
+/* Banner source is 1360×320; the tagline gap starts at x≈698 and is centred at y≈137. */
+.brand {
+  position: relative;
+  container-type: inline-size;
+  width: min(100%, 1360px);
+  margin: 0;
+  font: inherit;
+  user-select: none;
+}
+
+.brand-banner {
   display: block;
+  width: 100%;
+  height: auto;
+}
+
+.brand-tagline {
+  position: absolute;
+  left: 51.3%;
+  top: 42.7%;
+  transform: translateY(-50%);
+  color: #141414;
+  font-size: 2.6cqi;
+  font-weight: 400;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 @media (min-width: 901px) {
-  .main-banner {
-    max-width: 50%;
+  .brand {
+    width: min(50%, 1360px);
   }
 }
 
 @media (min-width: 1400px) {
-  .main-banner {
-    max-width: 40%;
+  .brand {
+    width: min(40%, 1360px);
   }
 }
 

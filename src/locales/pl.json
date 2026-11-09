@@ -1,6 +1,6 @@
 {
   "app": {
-    "bannerAlt": "img-cropper – skaluj i kadruj zdjęcia",
+    "tagline": "Skaluj i kadruj zdjęcia.",
     "languageToggle": "Zmień język",
     "statusChip": "Gotowe: {done}/{total} {'|'} Błędy: {errors}",
     "close": "Zamknij"
