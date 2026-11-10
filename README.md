@@ -88,7 +88,7 @@ src/
 
 **Translations stored as keys, not text.** Notifications in the store hold a message key and params (for example `filesAdded` with `{ count: 3 }`) and are translated when rendered. Switching the language therefore re-translates notifications that are already on screen. Keys are typed from the message catalog, so a missing key fails type-check. Validation and processing errors follow the same idea: functions return codes (`fileTooLarge`, `imageEncode`) and only the UI turns them into sentences. Polish needs three plural forms (1 plik, 2 pliki, 5 plików), handled by a custom plural rule.
 
-**Pointer events in the crop editor.** The editor uses pointer events with pointer capture, so the same code handles mouse, touch and pen, and dragging keeps working when the pointer leaves the canvas.
+**Pointer events in the crop editor.** The editor uses pointer events with pointer capture, so the same code handles mouse, touch and pen, and a drag is not lost when the pointer leaves the canvas: releasing it outside still ends the drag cleanly.
 
 **CI and deployment.** Every push runs type-check and tests; a push to `main` then builds and deploys to GitHub Pages. Assets are bundled by Vite with content hashes in their file names, so a new deploy is never hidden behind a cached old file.
 
